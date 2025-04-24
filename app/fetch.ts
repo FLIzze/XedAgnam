@@ -10,6 +10,7 @@ export enum FetchType {
 interface Cover {
         id: string,
         relationships: Relationships,
+        attributes: CoverAttributes,
 }
 
 interface Manga {
@@ -17,6 +18,11 @@ interface Manga {
         type: string,
         attributes: Attributes,
         relationships: Relationships[],
+}
+
+interface CoverAttributes {
+        volume: string,
+        fileName: string,
 }
 
 interface Attributes {
@@ -49,22 +55,28 @@ export async function FetchBy(fetchType: FetchType) {
 
         for (let i = 0; i < limit; i++) {
                 const manga: Manga = jsonData.data[i];
-                FetchCoverById(manga);
+                await fetchCoverById(manga);
         }
 }
 
-export async function FetchCoverById(manga: Manga) {
-        console.log(manga);
-        console.log(manga.relationships[2].id);
+async function fetchCoverById(manga: Manga) {
+        const coverRelationShip = manga.relationships.find(el => el.type === "cover_art");
 
-        try {
-                const jsonData = await fetch(`https://api.mangadex.org/cover/${manga.relationships[2].id}`);
-        } catch {
-                console.log("Error fetching cover.");
+        const response = await fetch(`https://api.mangadex.org/cover/${coverRelationShip}`);
+        if (!response.ok) {
+                throw new Error(`Error fetching cover`);
         }
 
+        const jsonData = await response.json();
+        const cover: Cover = jsonData.data;
+        const fileName = cover.attributes.fileName;
+
+        console.log(fileName);
+
+        // console.log("Error fetching cover.");
+
         // const cover: Manga = jsonData.data[0];
-        console.log(jsonData.data);
+        // console.log(jsonData.data);
         // const covertArt = json
 
         // response = await fetch(`https://uploads.mangadex.org/covers/${manga.id}/${}`);
