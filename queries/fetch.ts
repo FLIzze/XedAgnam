@@ -1,4 +1,4 @@
-import { FetchType, RelationShip } from "@/enum";
+import { FetchType } from "@/enum";
 import { useQuery } from "@tanstack/react-query";
 
 const apiUrl = "https://api.mangadex.org";
@@ -87,7 +87,7 @@ export function useFetchByType(fetchType: FetchType) {
 
 export function useFetchMangaById(id: string) {
         return useQuery({
-                queryKey: ["mangaIndex"],
+                queryKey: ["mangaIndex", id],
                 queryFn: async (): Promise<Manga> => {
                         return fetchMangaById(id);
                 },
@@ -96,7 +96,7 @@ export function useFetchMangaById(id: string) {
 
 export function useFetchCoverByManga(manga: Manga) {
         return useQuery({
-                queryKey: ["cover"],
+                queryKey: ["cover", manga],
                 queryFn: async (): Promise<string> => {
                         return fetchCoverByManga(manga);
                 },
