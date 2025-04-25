@@ -1,11 +1,13 @@
 import Text from "@/components/common/Text";
-import { Link } from "expo-router";
-import { StyleSheet, View } from "react-native";
-import { FetchBy, FetchType } from "../fetch";
+import { FetchType } from "@/enum";
+import { useFetchByType } from "@/queries/fetch";
+import { Link, router } from "expo-router";
+import { StyleSheet, View, Image } from "react-native";
+import { GestureHandlerRootView, Pressable, ScrollView } from "react-native-gesture-handler";
 
 export default function HomePage() {
-       FetchBy(FetchType.Relevance); 
-
+        const {data} = useFetchByType(FetchType.FollowedCount);
+        
   return (
     <View
       style={{
@@ -15,6 +17,30 @@ export default function HomePage() {
       }}
     >
       <Text variant="header">Home Page</Text>
+
+      <GestureHandlerRootView>
+              <ScrollView
+                      horizontal={true}
+              >
+              {data?.map((manga) => (
+                      <View
+                              key={manga.id}
+                      >
+                              <Pressable onPress={() => router.push(`/manga/${manga.id}`)}
+                                >
+                                      <Image
+                                              key={manga.id}
+                                              source={{ uri: manga.coverUrl }}
+                                              style={{width: 300, height: 300}}
+                                      />
+                              </Pressable>
+
+                              <Text>{manga.title}</Text>
+                       </View>
+              ))}
+              </ScrollView>
+      </GestureHandlerRootView>
+
       <Link
         href={{
           pathname: "/manga/[mangaId]",
