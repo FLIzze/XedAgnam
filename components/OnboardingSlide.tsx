@@ -1,10 +1,12 @@
-import { useWindowDimensions } from "react-native";
+import { Image, useWindowDimensions } from "react-native";
 import Box from "./common/Box";
 import Text from "./common/Text";
 import theme from "@/theme";
 import { router } from "expo-router";
 import Button from "./common/Button";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { logo } from "../assets/images/index";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Props {
   title: string;
@@ -15,36 +17,44 @@ interface Props {
 export default function OnBoardingSlide({ title, subtitle, index }: Props) {
   const { width, height } = useWindowDimensions();
 
+  const redirectToHomeAfterOnboarding = () => {
+    AsyncStorage.setItem("hasOnBoarded", "true");
+    router.replace("/(tabs)");
+  };
+
   return (
     <Box
       width={width}
       alignItems="center"
-      justifyContent="flex-end"
-      gap="lg"
       paddingVertical="xxl"
       paddingHorizontal="md"
     >
-      <Text color="textPrimary">{title}</Text>
-      {index < 3 ? (
-        <Text color="textSecondary">{subtitle}</Text>
-      ) : (
-        <Button label={subtitle} onPress={() => router.replace("/(tabs)")} />
-      )}
-      <Box flexDirection="row" gap="sm">
-        {[...Array(4)].map((number, circleIndex) => {
-          return (
-            <FontAwesome
-              name="circle"
-              size={8}
-              color={
-                circleIndex === index
-                  ? theme.colors.accent
-                  : theme.colors.textSecondary
-              }
-              key={circleIndex}
-            />
-          );
-        })}
+      <Box flex={3} alignItems="center" justifyContent="center">
+        <Image source={logo} style={{ width: 250, height: 250 }} />
+      </Box>
+      <Box flex={1} alignItems="center" justifyContent="space-between">
+        <Text color="textPrimary">{title}</Text>
+        {index < 3 ? (
+          <Text color="textSecondary">{subtitle}</Text>
+        ) : (
+          <Button label={subtitle} onPress={redirectToHomeAfterOnboarding} />
+        )}
+        <Box flexDirection="row" gap="sm">
+          {[...Array(4)].map((_, circleIndex) => {
+            return (
+              <FontAwesome
+                name="circle"
+                size={8}
+                color={
+                  circleIndex === index
+                    ? theme.colors.accent
+                    : theme.colors.textSecondary
+                }
+                key={circleIndex}
+              />
+            );
+          })}
+        </Box>
       </Box>
     </Box>
   );

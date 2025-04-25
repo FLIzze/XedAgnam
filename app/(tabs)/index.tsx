@@ -4,10 +4,14 @@ import { useFetchByType } from "@/queries/fetch";
 import { Link, router } from "expo-router";
 import { StyleSheet, View, Image } from "react-native";
 import { GestureHandlerRootView, Pressable, ScrollView } from "react-native-gesture-handler";
+import { useHasOnBoarded } from "@/hooks/useHasOnBoarded";
 
 export default function HomePage() {
         const {data} = useFetchByType(FetchType.FollowedCount);
-        
+  const { hasOnBoarded, checkedStorage } = useHasOnBoarded();
+
+  if (!checkedStorage || hasOnBoarded === null) return null;
+
   return (
     <View
       style={{
