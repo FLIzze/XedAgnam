@@ -1,8 +1,29 @@
 import Text from "@/components/common/Text";
-import { Link } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Link, router, useRootNavigationState } from "expo-router";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 export default function HomePage() {
+  const [hasOnBoarded, setHasOnBoarded] = useState<boolean | null>(null);
+  const [checkedStorage, setCheckedStorage] = useState(false);
+  const rootNavigationState = useRootNavigationState();
+
+  useEffect(() => {
+    if (!checkedStorage && rootNavigationState?.key) {
+      AsyncStorage.getItem("hasOnBoarded").then((value) => {
+        const onboarded = value === "true";
+        setHasOnBoarded(onboarded);
+        setCheckedStorage(true);
+        if (!onboarded) {
+          router.replace("/onboarding");
+        }
+      });
+    }
+  }, [rootNavigationState?.key, checkedStorage]);
+
+  if (!checkedStorage || hasOnBoarded === null) return null;
+
   return (
     <View
       style={{
