@@ -58,20 +58,24 @@ export async function FetchBy(fetchType: FetchType) {
         }
 
         const jsonData = await response.json();
+        const covers: string[] = [];
 
         for (let i = 0; i < limit; i++) {
                 const manga: Manga = jsonData.data[i];
-                await fetchCoverById(manga);
+                const coverUrl = await fetchCoverById(manga);
+                covers.push(coverUrl);
         }
+
+        console.log(covers);
 }
 
-async function fetchCoverById(manga: Manga) {
+async function fetchCoverById(manga: Manga): Promise<string> {
         const coverRelationShip = manga.relationships.find(el => el.type === "cover_art");
 
         const response = await fetch(`${apiUrl}/cover/${coverRelationShip?.id}`);
         if (!response.ok) {
                 console.log("Error fetching cover");
-                return;
+                return '';
         }
 
         const jsonData = await response.json();
@@ -79,7 +83,7 @@ async function fetchCoverById(manga: Manga) {
         const fileName = cover.attributes.fileName;
 
         const cover_response: CoverResponse = await fetch(`${uploadApiUrl}/covers/${manga.id}/${fileName}`);
-        console.log(cover_response.url);
+        return cover_response.url
 }
 
 function addContentRating(url: string): string {

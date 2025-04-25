@@ -1,8 +1,11 @@
 import Text from "@/components/common/Text";
 import { Link } from "expo-router";
 import { StyleSheet, View } from "react-native";
+import { FetchBy, FetchType } from "../fetch";
 
 export default function HomePage() {
+       FetchBy(FetchType.Relevance); 
+
   return (
     <View
       style={{
