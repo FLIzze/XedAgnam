@@ -1,5 +1,7 @@
 const contentRating = ["safe", "suggestive"];
 const limit = 10;
+const apiUrl = "https://api.mangadex.org";
+const uploadApiUrl = "https://uploads.mangadex.org";
 
 export enum FetchType {
         FollowedCount = "followedCount",
@@ -11,6 +13,10 @@ interface Cover {
         id: string,
         relationships: Relationships,
         attributes: CoverAttributes,
+}
+
+interface CoverResponse {
+        url: string,
 }
 
 interface Manga {
@@ -41,7 +47,7 @@ interface Relationships {
 }
 
 export async function FetchBy(fetchType: FetchType) {
-        let url = `https://api.mangadex.org/manga?order[${fetchType}]=desc`;
+        let url = `${apiUrl}/manga?order[${fetchType}]=desc`;
 
         url = addContentRating(url);
         url = addLimit(url);
@@ -62,28 +68,18 @@ export async function FetchBy(fetchType: FetchType) {
 async function fetchCoverById(manga: Manga) {
         const coverRelationShip = manga.relationships.find(el => el.type === "cover_art");
 
-        const response = await fetch(`https://api.mangadex.org/cover/${coverRelationShip}`);
+        const response = await fetch(`${apiUrl}/cover/${coverRelationShip?.id}`);
         if (!response.ok) {
-                throw new Error(`Error fetching cover`);
+                console.log("Error fetching cover");
+                return;
         }
 
         const jsonData = await response.json();
         const cover: Cover = jsonData.data;
         const fileName = cover.attributes.fileName;
 
-        console.log(fileName);
-
-        // console.log("Error fetching cover.");
-
-        // const cover: Manga = jsonData.data[0];
-        // console.log(jsonData.data);
-        // const covertArt = json
-
-        // response = await fetch(`https://uploads.mangadex.org/covers/${manga.id}/${}`);
-
-        // https://api.mangadex.org/manga/:id-manga -> infos du manga + id cover_art
-        // https://api.mangadex.org/cover/:id-cover_art -> filename cover_art
-        // https://uploads.mangadex.org/covers/:id-manga/:filename-cover_art 
+        const cover_response: CoverResponse = await fetch(`${uploadApiUrl}/covers/${manga.id}/${fileName}`);
+        console.log(cover_response.url);
 }
 
 function addContentRating(url: string): string {
