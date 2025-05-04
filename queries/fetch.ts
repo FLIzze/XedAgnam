@@ -1,4 +1,3 @@
-import { FetchType } from "@/enum";
 import { useQuery } from "@tanstack/react-query";
 
 const apiUrl = "https://api.mangadex.org";
@@ -6,7 +5,7 @@ const uploadApiUrl = "https://uploads.mangadex.org";
 const contentRating = ["safe", "suggestive"];
 const limit = 10;
 
-export async function fetchByType(fetchType: FetchType): Promise<HomeMangaResponse[]> {
+export async function fetchByType(fetchType: "followedCount" | "latestUploadedChapter" | "relevance"): Promise<HomeMangaResponse[]> {
         let url = `${apiUrl}/manga?order[${fetchType}]=desc`;
 
         url = addContentRating(url);
@@ -76,9 +75,9 @@ function addLimit(url: string): string {
         return url + `&limit=${limit}`;
 }
 
-export function useFetchByType(fetchType: FetchType) {
+export function useFetchByType(fetchType: "followedCount" | "latestUploadedChapter" | "relevance") {
         return useQuery({
-                queryKey: ["mangas"],
+               queryKey: ["mangas"],
                 queryFn: async (): Promise<HomeMangaResponse[]> => {
                         return fetchByType(fetchType);
                 },

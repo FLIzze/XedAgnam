@@ -1,5 +1,4 @@
 import Text from "@/components/common/Text";
-import { FetchType } from "@/enum";
 import { useFetchByType } from "@/queries/fetch";
 import { Link, router } from "expo-router";
 import { StyleSheet, View, Image } from "react-native";
@@ -7,7 +6,7 @@ import { GestureHandlerRootView, Pressable, ScrollView } from "react-native-gest
 import { useHasOnBoarded } from "@/hooks/useHasOnBoarded";
 
 export default function HomePage() {
-        const {data} = useFetchByType(FetchType.FollowedCount);
+  const {data} = useFetchByType("followedCount");
   const { hasOnBoarded, checkedStorage } = useHasOnBoarded();
 
   if (!checkedStorage || hasOnBoarded === null) return null;
