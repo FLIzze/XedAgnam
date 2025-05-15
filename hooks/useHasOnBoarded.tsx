@@ -7,18 +7,18 @@ export function useHasOnBoarded() {
     const [checkedStorage, setCheckedStorage] = useState(false);
     // const rootNavigationState = useRootNavigationState();
 
-    // useEffect(() => {
-    //         if (!checkedStorage && rootNavigationState?.key) {
-    //                 AsyncStorage.getItem("hasOnBoarded").then((value) => {
-    //                         const onboarded = value === "true";
-    //                         setHasOnBoarded(onboarded);
-    //                         setCheckedStorage(true);
-    //                         if (!onboarded) {
-    //                                 router.replace("/onboarding");
-    //                         }
-    //                 });
-    //         }
-    // }, [rootNavigationState?.key, checkedStorage]);
+    useEffect(() => {
+        if (!checkedStorage) {
+            AsyncStorage.getItem("hasOnBoarded").then(value => {
+                const onboarded = value === "true";
+                setHasOnBoarded(onboarded);
+                setCheckedStorage(true);
+                if (!onboarded) {
+                    router.replace("/onboarding");
+                }
+            });
+        }
+    }, [checkedStorage]);
 
     return { hasOnBoarded, checkedStorage };
 }
