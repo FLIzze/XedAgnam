@@ -1,67 +1,58 @@
 import Text from "@/components/common/Text";
 import { useFetchByType } from "@/queries/fetch";
 import { Link, router } from "expo-router";
-import { StyleSheet, View, Image } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Image,
+  ActivityIndicator,
+  useWindowDimensions,
+} from "react-native";
 import {
   GestureHandlerRootView,
   Pressable,
   ScrollView,
 } from "react-native-gesture-handler";
 import { useHasOnBoarded } from "@/hooks/useHasOnBoarded";
+import Box from "@/components/common/Box";
+import MangaHorizontalList from "@/components/home/MangaHorizontalList";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomePage() {
-  const { data } = useFetchByType("followedCount");
+  const followedCount = useFetchByType("followedCount");
+  const latestUploadedChapter = useFetchByType("latestUploadedChapter");
+  const relevance = useFetchByType("relevance");
   const { hasOnBoarded, checkedStorage } = useHasOnBoarded();
+  const { width, height } = useWindowDimensions();
 
   // if (!checkedStorage || hasOnBoarded === null) return null;
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text variant="header">Home Page</Text>
+    <SafeAreaView style={styles.container}>
+      <Box gap={"md"} alignItems={"center"} justifyContent={"center"}>
+        {followedCount.data === undefined ? (
+          <ActivityIndicator />
+        ) : (
+          <MangaHorizontalList mangaList={followedCount.data} />
+        )}
 
-      <GestureHandlerRootView>
-        <ScrollView horizontal={true}>
-          {data?.map((manga) => (
-            <View key={manga.id}>
-              <Pressable onPress={() => router.push(`/manga/${manga.id}`)}>
-                <Image
-                  key={manga.id}
-                  source={{ uri: manga.coverUrl }}
-                  style={{ width: 300, height: 300 }}
-                />
-              </Pressable>
+        {latestUploadedChapter.data === undefined ? (
+          <ActivityIndicator />
+        ) : (
+          <MangaHorizontalList mangaList={latestUploadedChapter.data} />
+        )}
 
-              <Text>{manga.title}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      </GestureHandlerRootView>
+        {relevance.data === undefined ? (
+          <ActivityIndicator />
+        ) : (
+          <MangaHorizontalList mangaList={relevance.data} />
+        )}
 
-      <Link
-        href={{
-          pathname: "/manga/[mangaId]",
-          params: { mangaId: "testupup" },
-        }}
-        style={styles.link}
-      >
-        Manga testupup
-      </Link>
-
-      <Link
-        href={{
-          pathname: "/onboarding",
-        }}
-        style={styles.link}
-      >
-        Onboarding
-      </Link>
-    </View>
+        <Link href={"/onboarding"}>
+          <Text color={"textPrimary"}>Onboarding</Text>
+        </Link>
+      </Box>
+    </SafeAreaView>
   );
 }
 
@@ -69,5 +60,8 @@ const styles = StyleSheet.create({
   link: {
     textDecorationLine: "underline",
     color: "#90D5FF",
+  },
+  container: {
+    flex: 1,
   },
 });
