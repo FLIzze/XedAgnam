@@ -53,7 +53,7 @@ export default function OnBoardingScreen() {
           height: 250,
           position: "absolute",
           top: "25%",
-          left: width / 6,
+          left: width / 2 - 125,
         }}
       />
     </Box>
