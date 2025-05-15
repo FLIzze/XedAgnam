@@ -1,43 +1,115 @@
 {
-    "expo": {
-        "name": "XedAgnam",
-        "slug": "XedAgnam",
-        "version": "1.0.0",
-        "orientation": "portrait",
-        "icon": "./assets/images/icon.png",
-        "scheme": "myapp",
-        "userInterfaceStyle": "automatic",
-        "newArchEnabled": true,
-        "ios": {
-            "supportsTablet": true
-        },
-        "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/images/adaptive-icon.png",
-                "backgroundColor": "#ffffff"
-            }
-        },
-        "web": {
-            "bundler": "metro",
-            "output": "static",
-            "favicon": "./assets/images/favicon.png"
-        },
-        "plugins": [
-            "expo-router",
-            [
-                "expo-splash-screen",
-                {
-                    "image": "./assets/images/splash-icon.png",
-                    "imageWidth": 200,
-                    "resizeMode": "contain",
-                    "backgroundColor": "#ffffff"
-                }
-            ],
-            "expo-font",
-            "expo-web-browser"
-        ],
-        "experiments": {
-            "typedRoutes": true
+  "expo": {
+    "name": "XedAgnam",
+    "slug": "XedAgnam",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/ios-dark.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.xedagnam.XedAgnam",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "icon": {
+        "dark": "./assets/images/ios-dark.png",
+        "light": "./assets/images/ios-light.png"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.xedagnam.XedAgnam"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon-light.png",
+          "dark": {
+            "image": "./assets/images/splash-icon-dark.png",
+            "backgroundColor": "#000000"
+          },
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#232323"
         }
+=======
+  "expo": {
+    "name": "XedAgnam",
+    "slug": "XedAgnam",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/ios-dark.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.xedagnam.XedAgnam",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "icon": {
+        "dark": "./assets/images/ios-dark.png",
+        "light": "./assets/images/ios-light.png"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.xedagnam.XedAgnam"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon-light.png",
+          "dark": {
+            "image": "./assets/images/splash-icon-dark.png",
+            "backgroundColor": "#000000"
+          },
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#232323"
+        }
+      ],
+      "expo-font",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2c885c44-5e90-4c4c-83c0-7139d82c3437"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2c885c44-5e90-4c4c-83c0-7139d82c3437"
+>>>>>>> 46ea4c88475b231a2102621b5593732a5987b91a
     }
 }
