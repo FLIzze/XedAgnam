@@ -1,65 +1,60 @@
 import Text from "@/components/common/Text";
-import { useFetchCoverByManga, useFetchMangaById } from "@/queries/fetch";
+import { useFetchCoverByManga, useFetchMangaById, useFetchVolumesByManga } from "@/queries/fetch";
 import { Link } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 export default function MangaPage() {
-  const { mangaId } = useLocalSearchParams<{ mangaId: string }>();
-  const { data } = useFetchMangaById(mangaId);
-  const titleObj = data?.attributes.title
-  let title: string = "";
-  if (titleObj) {
-          title = String(Object.entries(titleObj)[0][1]);
-  }
-  const cover = useFetchCoverByManga(data!);
+    const { mangaId } = useLocalSearchParams<{ mangaId: string }>();
+    const { data } = useFetchMangaById(mangaId);
 
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-    <Image
-    key={data?.id}
-    source={{ uri: cover.data }}
-    style={{width: 200, height: 200}}
-    />
-      <Text 
-      variant="header"
-      >
-        title: {title + "\n"}
-        id: {data?.id + "\n"}        
-        demographic: {data?.attributes.publicationDemographic + "\n"}
-        year: {data?.attributes.year + "\n"}
-        status: {data?.attributes.status + "\n"}
-        lastVolume: {data?.attributes.lastVolume + "\n"}
-        description: {data?.attributes.description.en + "\n"}
-        lastChapter: {data?.attributes.lastChapter + "\n"}
-      </Text>
+    const titleObj = data?.attributes.title;
+    let title: string = "";
+    if (titleObj) {
+        title = String(Object.entries(titleObj)[0][1]);
+    }
 
-      <Link
-        href={{
-          pathname: "/manga/[mangaId]/chapter/[chapterId]/[pageId]",
-          params: {
-            mangaId: mangaId,
-            chapterId: "testapap",
-            pageId: "testopop",
-          },
-        }}
-        style={styles.link}
-      >
-        Chapitre testapap
-      </Link>
-    </View>
-  );
+    const cover = useFetchCoverByManga(data!);
+    const volumesData = useFetchVolumesByManga(mangaId);
+    const volumesArr = Object.values(volumesData.data?.volumes ?? {});
+
+    return (
+        <ScrollView>
+            <Image
+                key={data?.id}
+                source={{ uri: cover.data }}
+                style={{ width: 200, height: 200 }}
+            />
+            <Text variant="header">
+                title: {title + "\n"}
+                id: {data?.id + "\n"}
+                demographic: {data?.attributes.publicationDemographic + "\n"}
+                year: {data?.attributes.year + "\n"}
+                status: {data?.attributes.status + "\n"}
+                description: {data?.attributes.description.en + "\n"}
+            </Text>
+
+            {volumesArr.map((volume, volumeIndex) => {
+                const chaptersArr = Object.values(volume.chapters);
+
+                return (
+                    <View key={volumeIndex}>
+                        <Text>Volume: {volume.volume}</Text>
+
+                        {chaptersArr.map((chapter, chapterIndex) => (
+                            <Link
+                                key={chapterIndex}
+                                href={{
+                                    pathname: "/(tabs)",
+                                }}
+                                style={{ paddingLeft: 40 }}>
+                                Chapter: {chapter.chapter}
+                            </Link>
+                        ))}
+                    </View>
+                );
+            })}
+        </ScrollView>
+    );
 }
-
-const styles = StyleSheet.create({
-  link: {
-    textDecorationLine: "underline",
-    color: "#90D5FF",
-  },
-});
