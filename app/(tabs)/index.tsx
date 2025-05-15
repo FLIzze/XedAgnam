@@ -6,69 +6,69 @@ import { GestureHandlerRootView, Pressable, ScrollView } from "react-native-gest
 import { useHasOnBoarded } from "@/hooks/useHasOnBoarded";
 
 export default function HomePage() {
-  const {data} = useFetchByType("followedCount");
-  const { hasOnBoarded, checkedStorage } = useHasOnBoarded();
+        const { data } = useFetchByType("followedCount");
+        const { hasOnBoarded, checkedStorage } = useHasOnBoarded();
 
-  if (!checkedStorage || hasOnBoarded === null) return null;
+        if (!checkedStorage || hasOnBoarded === null) return null;
 
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text variant="header">Home Page</Text>
+        return (
+                <View
+                        style={{
+                                flex: 1,
+                                justifyContent: "center",
+                                alignItems: "center",
+                        }}
+                >
+                        <Text variant="header">Home Page</Text>
 
-      <GestureHandlerRootView>
-              <ScrollView
-                      horizontal={true}
-              >
-              {data?.map((manga) => (
-                      <View
-                              key={manga.id}
-                      >
-                              <Pressable onPress={() => router.push(`/manga/${manga.id}`)}
+                        <GestureHandlerRootView>
+                                <ScrollView
+                                        horizontal={true}
                                 >
-                                      <Image
-                                              key={manga.id}
-                                              source={{ uri: manga.coverUrl }}
-                                              style={{width: 300, height: 300}}
-                                      />
-                              </Pressable>
+                                        {data?.map((manga) => (
+                                                <View
+                                                        key={manga.id}
+                                                >
+                                                        <Pressable onPress={() => router.push(`/manga/${manga.id}`)}
+                                                        >
+                                                                <Image
+                                                                        key={manga.id}
+                                                                        source={{ uri: manga.coverUrl }}
+                                                                        style={{ width: 300, height: 300 }}
+                                                                />
+                                                        </Pressable>
 
-                              <Text>{manga.title}</Text>
-                       </View>
-              ))}
-              </ScrollView>
-      </GestureHandlerRootView>
+                                                        <Text>{manga.title}</Text>
+                                                </View>
+                                        ))}
+                                </ScrollView>
+                        </GestureHandlerRootView>
 
-      <Link
-        href={{
-          pathname: "/manga/[mangaId]",
-          params: { mangaId: "testupup" },
-        }}
-        style={styles.link}
-      >
-        Manga testupup
-      </Link>
+                        <Link
+                                href={{
+                                        pathname: "/manga/[mangaId]",
+                                        params: { mangaId: "testupup" },
+                                }}
+                                style={styles.link}
+                        >
+                                Manga testupup
+                        </Link>
 
-      <Link
-        href={{
-          pathname: "/onboarding",
-        }}
-        style={styles.link}
-      >
-        Onboarding
-      </Link>
-    </View>
-  );
+                        <Link
+                                href={{
+                                        pathname: "/onboarding",
+                                }}
+                                style={styles.link}
+                        >
+                                Onboarding
+                        </Link>
+                </View>
+        );
 }
 
 const styles = StyleSheet.create({
-  link: {
-    textDecorationLine: "underline",
-    color: "#90D5FF",
-  },
+        link: {
+                textDecorationLine: "underline",
+                color: "#90D5FF",
+        },
 });

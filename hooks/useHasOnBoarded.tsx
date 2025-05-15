@@ -3,22 +3,22 @@ import { router, useRootNavigationState } from "expo-router";
 import { useEffect, useState } from "react";
 
 export function useHasOnBoarded() {
-  const [hasOnBoarded, setHasOnBoarded] = useState<boolean | null>(null);
-  const [checkedStorage, setCheckedStorage] = useState(false);
-  const rootNavigationState = useRootNavigationState();
+        const [hasOnBoarded, setHasOnBoarded] = useState<boolean | null>(null);
+        const [checkedStorage, setCheckedStorage] = useState(false);
+        // const rootNavigationState = useRootNavigationState();
 
-  useEffect(() => {
-    if (!checkedStorage && rootNavigationState?.key) {
-      AsyncStorage.getItem("hasOnBoarded").then((value) => {
-        const onboarded = value === "true";
-        setHasOnBoarded(onboarded);
-        setCheckedStorage(true);
-        if (!onboarded) {
-          router.replace("/onboarding");
-        }
-      });
-    }
-  }, [rootNavigationState?.key, checkedStorage]);
+        // useEffect(() => {
+        //         if (!checkedStorage && rootNavigationState?.key) {
+        //                 AsyncStorage.getItem("hasOnBoarded").then((value) => {
+        //                         const onboarded = value === "true";
+        //                         setHasOnBoarded(onboarded);
+        //                         setCheckedStorage(true);
+        //                         if (!onboarded) {
+        //                                 router.replace("/onboarding");
+        //                         }
+        //                 });
+        //         }
+        // }, [rootNavigationState?.key, checkedStorage]);
 
-  return { hasOnBoarded, checkedStorage };
+        return { hasOnBoarded, checkedStorage };
 }

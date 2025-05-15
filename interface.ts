@@ -1,14 +1,14 @@
-interface Cover {
+export interface Cover {
         id: string,
         relationships: Relationships,
         attributes: CoverAttributes,
 }
 
-interface CoverResponse {
+export interface CoverResponse {
         url: string,
 }
 
-interface Manga {
+export interface Manga {
         id: string,
         type: string,
         attributes: Attributes,
@@ -39,7 +39,7 @@ interface Relationships {
         type: string,
 }
 
-interface HomeMangaResponse {
+export interface HomeMangaResponse {
         id: string,
         title: string,
         coverUrl: string,
