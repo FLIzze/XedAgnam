@@ -46,7 +46,12 @@ export default function MangaPage() {
                             <Link
                                 key={chapterIndex}
                                 href={{
-                                    pathname: "/(tabs)",
+                                    params: {
+                                        mangaId: "test2",
+                                        chapterId: "testupup",
+                                        pageId: "encore",
+                                    },
+                                    pathname: "/manga/[mangaId]/chapter/[chapterId]/[pageId]",
                                 }}
                                 style={{ paddingLeft: 40 }}>
                                 Chapter: {chapter.chapter}
