@@ -47,13 +47,12 @@ export default function MangaPage() {
                                 key={chapterIndex}
                                 href={{
                                     params: {
-                                        mangaId: "test2",
-                                        chapterId: "testupup",
-                                        pageId: "encore",
+                                        mangaId: mangaId,
+                                        chapterId: chapter.id,
                                     },
-                                    pathname: "/manga/[mangaId]/chapter/[chapterId]/[pageId]",
+                                    pathname: "/manga/[mangaId]/chapter/[chapterId]",
                                 }}
-                                style={{ paddingLeft: 40 }}>
+                                style={{ paddingLeft: 40, color: "red" }}>
                                 Chapter: {chapter.chapter}
                             </Link>
                         ))}
