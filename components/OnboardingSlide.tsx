@@ -29,9 +29,7 @@ export default function OnBoardingSlide({ title, subtitle, index }: Props) {
       paddingVertical="xxl"
       paddingHorizontal="md"
     >
-      <Box flex={3} alignItems="center" justifyContent="center">
-        <Image source={logo} style={{ width: 250, height: 250 }} />
-      </Box>
+      <Box flex={3} alignItems="center" justifyContent="center"></Box>
       <Box flex={1} alignItems="center" justifyContent="space-between">
         <Text color="textPrimary">{title}</Text>
         {index < 3 ? (

@@ -1,9 +1,12 @@
+import { logo } from "@/assets/images";
 import Box from "@/components/common/Box";
 import OnBoardingSlide from "@/components/OnboardingSlide";
 import theme from "@/theme";
+import { Image, useWindowDimensions } from "react-native";
 import { ScrollView } from "react-native";
 
 export default function OnBoardingScreen() {
+  const { width, height } = useWindowDimensions();
   const slides = [
     {
       title: "Explore un univers infini de mangas.",
@@ -32,6 +35,7 @@ export default function OnBoardingScreen() {
         horizontal
         pagingEnabled
         style={{ backgroundColor: theme.colors.background }}
+        showsHorizontalScrollIndicator={false}
       >
         {slides.map((slide, index) => (
           <OnBoardingSlide
@@ -42,6 +46,16 @@ export default function OnBoardingScreen() {
           />
         ))}
       </ScrollView>
+      <Image
+        source={logo}
+        style={{
+          width: 250,
+          height: 250,
+          position: "absolute",
+          top: "25%",
+          left: width / 6,
+        }}
+      />
     </Box>
   );
 }
