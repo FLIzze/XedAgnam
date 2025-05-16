@@ -8,8 +8,7 @@ export default function ChapterPage() {
     const { chapterId } = useLocalSearchParams<{ chapterId: string }>();
     const imgs = useFetchPagesByChapter(chapterId);
 
-    const screenWidth = Dimensions.get("window").width;
-    const baseAspectRatio = 1.5; // example: width:height ratio
+    const windowHeight = Dimensions.get("window").height;
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
@@ -20,10 +19,10 @@ export default function ChapterPage() {
                     <Image
                         source={{ uri: item }}
                         style={{
-                            width: screenWidth,
-                            height: screenWidth * baseAspectRatio,
-                            resizeMode: "cover",
-                            marginBottom: 16,
+                            marginTop: 10,
+                            width: windowHeight,
+                            height: windowHeight,
+                            resizeMode: "contain",
                         }}
                     />
                 )}
