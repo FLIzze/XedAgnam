@@ -3,7 +3,7 @@ import { useFetchCoverByManga, useFetchMangaById, useFetchVolumesByManga } from 
 import { Link } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { Image, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 
 export default function MangaPage() {
     const { mangaId } = useLocalSearchParams<{ mangaId: string }>();
@@ -20,45 +20,47 @@ export default function MangaPage() {
     const volumesArr = Object.values(volumesData.data?.volumes ?? {});
 
     return (
-        <ScrollView>
-            <Image
-                key={data?.id}
-                source={{ uri: cover.data }}
-                style={{ width: 200, height: 200 }}
-            />
-            <Text variant="header">
-                title: {title + "\n"}
-                id: {data?.id + "\n"}
-                demographic: {data?.attributes.publicationDemographic + "\n"}
-                year: {data?.attributes.year + "\n"}
-                status: {data?.attributes.status + "\n"}
-                description: {data?.attributes.description.en + "\n"}
-            </Text>
+        <GestureHandlerRootView>
+            <ScrollView>
+                <Image
+                    key={data?.id}
+                    source={{ uri: cover.data }}
+                    style={{ width: 200, height: 200 }}
+                />
+                <Text variant="header">
+                    title: {title + "\n"}
+                    id: {data?.id + "\n"}
+                    demographic: {data?.attributes.publicationDemographic + "\n"}
+                    year: {data?.attributes.year + "\n"}
+                    status: {data?.attributes.status + "\n"}
+                    description: {data?.attributes.description.en + "\n"}
+                </Text>
 
-            {volumesArr.map((volume, volumeIndex) => {
-                const chaptersArr = Object.values(volume.chapters);
+                {volumesArr.map((volume, volumeIndex) => {
+                    const chaptersArr = Object.values(volume.chapters);
 
-                return (
-                    <View key={volumeIndex}>
-                        <Text>Volume: {volume.volume}</Text>
+                    return (
+                        <View key={volumeIndex}>
+                            <Text>Volume: {volume.volume}</Text>
 
-                        {chaptersArr.map((chapter, chapterIndex) => (
-                            <Link
-                                key={chapterIndex}
-                                href={{
-                                    params: {
-                                        mangaId: mangaId,
-                                        chapterId: chapter.id,
-                                    },
-                                    pathname: "/manga/[mangaId]/chapter/[chapterId]",
-                                }}
-                                style={{ paddingLeft: 40, color: "red" }}>
-                                Chapter: {chapter.chapter}
-                            </Link>
-                        ))}
-                    </View>
-                );
-            })}
-        </ScrollView>
+                            {chaptersArr.map((chapter, chapterIndex) => (
+                                <Link
+                                    key={chapterIndex}
+                                    href={{
+                                        params: {
+                                            mangaId: mangaId,
+                                            chapterId: chapter.id,
+                                        },
+                                        pathname: "/manga/[mangaId]/chapter/[chapterId]",
+                                    }}
+                                    style={{ paddingLeft: 40, color: "red" }}>
+                                    Chapter: {chapter.chapter}
+                                </Link>
+                            ))}
+                        </View>
+                    );
+                })}
+            </ScrollView>
+        </GestureHandlerRootView>
     );
 }

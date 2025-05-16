@@ -41,7 +41,7 @@ interface Description {
 }
 
 interface Attributes {
-    title: {};
+    title: string;
     description: Description;
     lastVolume: string;
     lastChapter: string;
@@ -59,4 +59,15 @@ export interface HomeMangaResponse {
     id: string;
     title: string;
     coverUrl: string;
+}
+
+export interface PagesResponse {
+    baseUrl: string;
+    chapter: ChapterInfo;
+}
+
+interface ChapterInfo {
+    hash: string;
+    data: string[];
+    dataSaver: string[];
 }
