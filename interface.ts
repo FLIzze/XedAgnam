@@ -61,7 +61,7 @@ export interface HomeMangaResponse {
     coverUrl: string;
 }
 
-export interface PagesResponse {
+export interface PageResponse {
     baseUrl: string;
     chapter: ChapterInfo;
 }

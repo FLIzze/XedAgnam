@@ -3,7 +3,7 @@ import {
     CoverResponse,
     HomeMangaResponse,
     Manga,
-    PagesResponse,
+    PageResponse,
     VolumesResponse,
 } from "@/interface";
 import { Filter } from "@/types";
@@ -83,30 +83,30 @@ async function fetchCoverByManga(manga: Manga): Promise<string> {
     return cover_response.url;
 }
 
-async function fetchPagesByChapter(id: string): Promise<string[]> {
+export async function fetchPageByChapter(
+    pageResponse: PageResponse,
+    index: number
+): Promise<string> {
+    const uploadResponse = await fetch(
+        `${uploadApiUrl}/data/${pageResponse.chapter.hash}/${pageResponse.chapter.data[index]}`
+    );
+    if (!uploadResponse.ok) {
+        throw new Error("Error fetching pages");
+    }
+
+    return uploadResponse.url;
+}
+
+async function fetchPageResponse(id: string): Promise<PageResponse> {
     const response = await fetch(`${apiUrl}/at-home/server/${id}`);
     if (!response.ok) {
         throw new Error("Error fetching at-home/server");
     }
 
     const data = await response.json();
-    const pagesResponse: PagesResponse = data;
-    const nbrPages = pagesResponse.chapter.data.length;
+    const pageResponse: PageResponse = data;
 
-    const imgs: string[] = [];
-
-    for (let i = 0; i < nbrPages; i++) {
-        const uploadResponse = await fetch(
-            `${uploadApiUrl}/data/${pagesResponse.chapter.hash}/${pagesResponse.chapter.data[i]}`
-        );
-        if (!uploadResponse.ok) {
-            throw new Error("Error fetching pages");
-        }
-
-        imgs.push(uploadResponse.url);
-    }
-
-    return imgs;
+    return pageResponse;
 }
 
 function addContentRating(url: string): string {
@@ -157,11 +157,11 @@ export function useFetchCoverByManga(manga: Manga) {
     });
 }
 
-export function useFetchPagesByChapter(id: string) {
+export function useFetchPageResponse(id: string) {
     return useQuery({
-        queryKey: ["pages", id],
-        queryFn: async (): Promise<string[]> => {
-            return fetchPagesByChapter(id);
+        queryKey: ["server", id],
+        queryFn: async (): Promise<PageResponse> => {
+            return fetchPageResponse(id);
         },
     });
 }
