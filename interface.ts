@@ -66,8 +66,22 @@ export interface PageResponse {
     chapter: ChapterInfo;
 }
 
-interface ChapterInfo {
+export interface ChapterInfo {
     hash: string;
     data: string[];
     dataSaver: string[];
+}
+
+export interface FeedData {
+    id: string;
+    type: string;
+    attributes: FeedAttribute;
+}
+
+interface FeedAttribute {
+    chapter: string;
+    volume: string;
+    pages: number;
+    translatedLanguage: string;
+    title: string;
 }

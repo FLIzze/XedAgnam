@@ -1,47 +1,46 @@
-import React, { useEffect, useState } from "react";
 import { fetchPageByChapter, useFetchPageResponse } from "@/queries/fetch";
 import { useLocalSearchParams } from "expo-router/build/hooks";
-import { Dimensions, FlatList, Image } from "react-native";
+import { Dimensions, FlatList, Image, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useQueries } from "@tanstack/react-query";
 
 export default function ChapterPage() {
-    const [images, setImages] = useState<string[]>([]);
-
     const { chapterId } = useLocalSearchParams<{ chapterId: string }>();
     const pageResponse = useFetchPageResponse(chapterId);
+    const chapterInfo = pageResponse.data?.chapter;
 
     const nbrPage = pageResponse.data?.chapter.data.length;
     const windowHeight = Dimensions.get("window").width;
 
-    useEffect(() => {
-        const loadImg = async () => {
-            for (let i = 0; i < nbrPage!; i++) {
-                const chapter = await fetchPageByChapter(pageResponse.data!, i);
+    const pageQueries = useQueries({
+        queries:
+            chapterInfo?.data.map((_, index) => ({
+                queryKey: ["chapterPage", chapterInfo?.hash, index],
+                queryFn: () => fetchPageByChapter(chapterInfo, index),
+                enabled: !chapterInfo,
+            })) ?? [],
+    });
 
-                setImages(images => [...images, chapter]);
-            }
-        };
-
-        loadImg();
-    }, [nbrPage, pageResponse.data]);
+    console.log(pageQueries);
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <FlatList
-                data={images}
-                keyExtractor={item => item}
-                renderItem={({ item }) => (
-                    <Image
-                        source={{ uri: item }}
-                        style={{
-                            marginTop: 10,
-                            width: windowHeight,
-                            height: windowHeight,
-                            resizeMode: "contain",
-                        }}
-                    />
-                )}
-            />
-        </GestureHandlerRootView>
+        <View></View>
+        // <GestureHandlerRootView style={{ flex: 1 }}>
+        //     <FlatList
+        //         data={images}
+        //         keyExtractor={item => item}
+        //         renderItem={({ item }) => (
+        //             <Image
+        //                 source={{ uri: item }}
+        //                 style={{
+        //                     marginTop: 10,
+        //                     width: windowHeight,
+        //                     height: windowHeight,
+        //                     resizeMode: "contain",
+        //                 }}
+        //             />
+        //         )}
+        //     />
+        // </GestureHandlerRootView>
     );
 }

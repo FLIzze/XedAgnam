@@ -1,10 +1,11 @@
 import {
+        ChapterInfo,
     Cover,
     CoverResponse,
+    FeedData,
     HomeMangaResponse,
     Manga,
     PageResponse,
-    VolumesResponse,
 } from "@/interface";
 import { Filter } from "@/types";
 import { useQuery } from "@tanstack/react-query";
@@ -45,7 +46,7 @@ async function fetchByType(type: Filter): Promise<HomeMangaResponse[]> {
     return covers;
 }
 
-async function fetchMangaById(id: string): Promise<Manga> {
+async function fetchMangaMetadataById(id: string): Promise<Manga> {
     const response = await fetch(`${apiUrl}/manga/${id}`);
     if (!response.ok) {
         throw new Error("Error fetching cover");
@@ -55,15 +56,6 @@ async function fetchMangaById(id: string): Promise<Manga> {
     const manga: Manga = data.data;
 
     return manga;
-}
-
-async function fetchVolumesByManga(id: string): Promise<VolumesResponse> {
-    const response = await fetch(`https://api.mangadex.org/manga/${id}/aggregate`);
-    if (!response.ok) {
-        throw new Error("Error fetching chapters");
-    }
-
-    return await response.json();
 }
 
 async function fetchCoverByManga(manga: Manga): Promise<string> {
@@ -83,12 +75,9 @@ async function fetchCoverByManga(manga: Manga): Promise<string> {
     return cover_response.url;
 }
 
-export async function fetchPageByChapter(
-    pageResponse: PageResponse,
-    index: number
-): Promise<string> {
+export async function fetchPageByChapter(chapterInfo: ChapterInfo, index: number): Promise<string> {
     const uploadResponse = await fetch(
-        `${uploadApiUrl}/data/${pageResponse.chapter.hash}/${pageResponse.chapter.data[index]}`
+        `${uploadApiUrl}/data/${chapterInfo.hash}/${chapterInfo.data[index]}`
     );
     if (!uploadResponse.ok) {
         throw new Error("Error fetching pages");
@@ -134,16 +123,7 @@ export function useFetchMangaById(id: string) {
     return useQuery({
         queryKey: ["mangaId", id],
         queryFn: async (): Promise<Manga> => {
-            return fetchMangaById(id);
-        },
-    });
-}
-
-export function useFetchVolumesByManga(id: string) {
-    return useQuery({
-        queryKey: ["volume", id],
-        queryFn: async (): Promise<VolumesResponse> => {
-            return fetchVolumesByManga(id);
+            return fetchMangaMetadataById(id);
         },
     });
 }
@@ -162,6 +142,28 @@ export function useFetchPageResponse(id: string) {
         queryKey: ["server", id],
         queryFn: async (): Promise<PageResponse> => {
             return fetchPageResponse(id);
+        },
+    });
+}
+
+async function fetchMangaFeed(mangaId: string): Promise<FeedData[]> {
+    const response = await fetch(
+        `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc`
+    );
+    if (!response.ok) {
+        throw new Error("Error fetching manga feed.");
+    }
+
+    const data = await response.json();
+
+    return data.data;
+}
+
+export function useFetchMangaFeed(mangaId: string) {
+    return useQuery({
+        queryKey: ["feed", mangaId],
+        queryFn: async (): Promise<FeedData[]> => {
+            return fetchMangaFeed(mangaId);
         },
     });
 }
