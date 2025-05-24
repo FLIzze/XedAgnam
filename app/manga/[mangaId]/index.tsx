@@ -1,20 +1,25 @@
 import Text from "@/components/common/Text";
-import { FeedData } from "@/interface";
+import { Chapters, Translation, Volumes } from "@/interface";
 import {
     useFetchCoverByManga,
-    useFetchMangaById as useFetchMangaMetadataById,
+    useFetchMangaMetadataById,
     useFetchMangaFeed,
 } from "@/queries/fetch";
 import { Link } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
-import { Dispatch, SetStateAction } from "react";
-import { Image, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Image } from "react-native";
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 
 export default function MangaPage() {
     const { mangaId } = useLocalSearchParams<{ mangaId: string }>();
     const mangaMetadata = useFetchMangaMetadataById(mangaId);
+    const cover = useFetchCoverByManga(mangaMetadata.data!);
+    const feed = useFetchMangaFeed(mangaId);
+
     const mangaAttributes = mangaMetadata.data?.attributes;
+
+    const [volumes, setOrderedFeedDataArr] = useState<Volumes[]>();
 
     const titleObj = mangaMetadata.data?.attributes.title;
     let title: string = "";
@@ -22,109 +27,104 @@ export default function MangaPage() {
         title = String(Object.entries(titleObj)[0][1]);
     }
 
-    const cover = useFetchCoverByManga(mangaMetadata.data!);
-    const feedDataArr = useFetchMangaFeed(mangaId);
+    useEffect(() => {
+        if (!feed.data || feed.data.length === 0) {
+            return;
+        }
+
+        const feedDataArr = feed.data;
+
+        let volumes: Volumes[] = [];
+        let chapters: Chapters[] = [];
+        let translations: Translation[] = [];
+
+        let previousVolume = feedDataArr[0].attributes.volume;
+        let previousChapter = feedDataArr[0].attributes.chapter;
+
+        feedDataArr.forEach(feedData => {
+            if (previousVolume !== feedData.attributes.volume) {
+                volumes.push({
+                    volume: previousVolume,
+                    chapters: chapters,
+                });
+
+                previousVolume = feedData.attributes.volume;
+                chapters = [];
+            }
+
+            if (previousChapter !== feedData.attributes.chapter) {
+                chapters.push({
+                    chapter: previousChapter,
+                    translations: translations,
+                });
+
+                previousChapter = feedData.attributes.chapter;
+                translations = [];
+            }
+
+            translations.push({
+                lang: feedData.attributes.translatedLanguage,
+                title: feedData.attributes.title,
+                id: feedData.id,
+            });
+        });
+
+        volumes.push({
+            volume: "None",
+            chapters: chapters,
+        });
+        setOrderedFeedDataArr(volumes);
+    }, [feed.data]);
 
     return (
-        <View></View>
-        // <GestureHandlerRootView>
-        //     <ScrollView>
-        //         <Image
-        //             key={mangaMetadata.data?.id}
-        //             source={{ uri: cover.data }}
-        //             style={{ width: 200, height: 200 }}
-        //         />
-        //         <Text variant="header">
-        //             title: {title + "\n"}
-        //             id: {mangaMetadata.data?.id + "\n"}
-        //             demographic: {mangaAttributes?.publicationDemographic + "\n"}
-        //             year: {mangaAttributes?.year + "\n"}
-        //             status: {mangaAttributes?.status + "\n"}
-        //             description: {mangaAttributes?.description.en + "\n"}
-        //         </Text>
+        <GestureHandlerRootView>
+            <ScrollView>
+                <Image
+                    key={mangaMetadata.data?.id}
+                    source={{ uri: cover.data }}
+                    style={{ width: 200, height: 200 }}
+                />
+                <Text variant="header">
+                    title: {title + "\n"}
+                    id: {mangaMetadata.data?.id + "\n"}
+                    demographic: {mangaAttributes?.publicationDemographic + "\n"}
+                    year: {mangaAttributes?.year + "\n"}
+                    status: {mangaAttributes?.status + "\n"}
+                    description: {mangaAttributes?.description.en + "\n"}
+                </Text>
 
-        //         {feedDataArr.data?.map((feedData, index) => {
-        //             if (feedData.attributes.volume !== previousVolume) {
-        //                 setPreviousVolume(feedData.attributes.volume);
-
-        //                 return (
-        //                     <Text key={index}>
-        //                         Volume {previousVolume + "\n"}
-        //                         <ChaptersDisplay
-        //                             index={index}
-        //                             mangaId={mangaId!}
-        //                             chapter={feedData}
-        //                             previousChapter={previousChapter}
-        //                             setPreviousChapter={setPreviousChapter}
-        //                         />
-        //                     </Text>
-        //                 );
-        //             }
-
-        //             return (
-        //                 <ChaptersDisplay
-        //                     index={index}
-        //                     mangaId={mangaId!}
-        //                     chapter={feedData}
-        //                     key={index}
-        //                     previousChapter={previousChapter}
-        //                     setPreviousChapter={setPreviousChapter}
-        //                 />
-        //             );
-        //         })}
-        //     </ScrollView>
-        // </GestureHandlerRootView>
-    );
-}
-
-function ChaptersDisplay({
-    index,
-    mangaId,
-    chapter,
-    previousChapter,
-    setPreviousChapter,
-}: {
-    index: number;
-    mangaId: string;
-    chapter: FeedData;
-    previousChapter: string;
-    setPreviousChapter: Dispatch<SetStateAction<string>>;
-}) {
-    if (previousChapter !== chapter.attributes.chapter) {
-        setPreviousChapter(chapter.attributes.chapter);
-
-        return (
-            <Text style={{ marginLeft: 80 }}>
-                Chapter {chapter.attributes.chapter}
-                <ChapterLink index={index} mangaId={mangaId} chapter={chapter} />
-            </Text>
-        );
-    }
-
-    return <ChapterLink index={index} mangaId={mangaId} chapter={chapter} />;
-}
-
-function ChapterLink({
-    index,
-    mangaId,
-    chapter,
-}: {
-    index: number;
-    mangaId: string;
-    chapter: FeedData;
-}) {
-    return (
-        <Link
-            key={index}
-            href={{
-                params: {
-                    mangaId: mangaId,
-                    chapterId: chapter.id,
-                },
-                pathname: "/manga/[mangaId]/chapter/[chapterId]",
-            }}
-            style={{ paddingLeft: 40, color: "red" }}>
-            {chapter.attributes.translatedLanguage}
-        </Link>
+                {volumes?.map((volume, index) => {
+                    return (
+                        <Text key={index}>
+                            Volume: {volume.volume + "\n"}
+                            {volume.chapters.map((chapter, index) => {
+                                return (
+                                    <Text key={index} style={{ marginLeft: 40 }}>
+                                        Chapter: {chapter.chapter + "\n"}
+                                        {chapter.translations.map((translation, index) => {
+                                            return (
+                                                <Link
+                                                    key={index}
+                                                    style={{ marginLeft: 80, color: "red" }}
+                                                    href={{
+                                                        params: {
+                                                            mangaId: mangaId,
+                                                            chapterId: translation.id,
+                                                        },
+                                                        pathname:
+                                                            "/manga/[mangaId]/chapter/[chapterId]",
+                                                    }}>
+                                                    {translation.lang + "\n"}
+                                                </Link>
+                                            );
+                                        })}
+                                    </Text>
+                                );
+                            })}
+                        </Text>
+                    );
+                })}
+            </ScrollView>
+        </GestureHandlerRootView>
     );
 }

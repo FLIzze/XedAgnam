@@ -1,5 +1,5 @@
 import {
-        ChapterInfo,
+    ChapterInfo,
     Cover,
     CoverResponse,
     FeedData,
@@ -75,7 +75,7 @@ async function fetchCoverByManga(manga: Manga): Promise<string> {
     return cover_response.url;
 }
 
-export async function fetchPageByChapter(chapterInfo: ChapterInfo, index: number): Promise<string> {
+async function fetchPageByChapter(chapterInfo: ChapterInfo, index: number): Promise<string> {
     const uploadResponse = await fetch(
         `${uploadApiUrl}/data/${chapterInfo.hash}/${chapterInfo.data[index]}`
     );
@@ -119,7 +119,7 @@ export function useFetchByType(fetchType: "followedCount" | "latestUploadedChapt
     });
 }
 
-export function useFetchMangaById(id: string) {
+export function useFetchMangaMetadataById(id: string) {
     return useQuery({
         queryKey: ["mangaId", id],
         queryFn: async (): Promise<Manga> => {
@@ -148,7 +148,7 @@ export function useFetchPageResponse(id: string) {
 
 async function fetchMangaFeed(mangaId: string): Promise<FeedData[]> {
     const response = await fetch(
-        `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc`
+        `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc&limit=100`
     );
     if (!response.ok) {
         throw new Error("Error fetching manga feed.");
@@ -162,8 +162,13 @@ async function fetchMangaFeed(mangaId: string): Promise<FeedData[]> {
 export function useFetchMangaFeed(mangaId: string) {
     return useQuery({
         queryKey: ["feed", mangaId],
-        queryFn: async (): Promise<FeedData[]> => {
-            return fetchMangaFeed(mangaId);
-        },
+        queryFn: () => fetchMangaFeed(mangaId),
+    });
+}
+
+export function useFetchPageByChapter(chapterInfo: ChapterInfo, index: number) {
+    return useQuery({
+        queryKey: ["chapterPage", chapterInfo.hash, index],
+        queryFn: () => fetchPageByChapter(chapterInfo, index),
     });
 }

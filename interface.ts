@@ -8,22 +8,6 @@ export interface CoverResponse {
     url: string;
 }
 
-// wtf mangadex
-export interface VolumesResponse {
-    volumes: Record<string, Volume>;
-}
-
-export interface Volume {
-    volume: string;
-    count: number;
-    chapters: Record<string, Chapter>;
-}
-
-export interface Chapter {
-    chapter: number;
-    id: number;
-}
-
 export interface Manga {
     id: string;
     type: string;
@@ -84,4 +68,20 @@ interface FeedAttribute {
     pages: number;
     translatedLanguage: string;
     title: string;
+}
+
+export interface Volumes {
+    volume: string;
+    chapters: Chapters[];
+}
+
+export interface Chapters {
+    chapter: string;
+    translations: Translation[];
+}
+
+export interface Translation {
+    title: string;
+    lang: string;
+    id: string;
 }
