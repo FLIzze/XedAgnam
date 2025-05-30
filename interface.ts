@@ -70,16 +70,6 @@ interface FeedAttribute {
     title: string;
 }
 
-export interface Volumes {
-    volume: string;
-    chapters: Chapters[];
-}
-
-export interface Chapters {
-    chapter: string;
-    translations: Translation[];
-}
-
 export interface Translation {
     title: string;
     lang: string;

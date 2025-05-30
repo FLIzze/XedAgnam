@@ -1,130 +1,117 @@
 import Text from "@/components/common/Text";
-import { Chapters, Translation, Volumes } from "@/interface";
+import { QueryStatus } from "@/components/QueryStatus";
+import { FeedData, Manga } from "@/interface";
 import {
     useFetchCoverByManga,
     useFetchMangaMetadataById,
     useFetchMangaFeed,
 } from "@/queries/fetch";
-import { Link } from "expo-router";
-import { useLocalSearchParams } from "expo-router/build/hooks";
-import { useEffect, useState } from "react";
+import { Link, useLocalSearchParams } from "expo-router";
 import { Image } from "react-native";
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 
 export default function MangaPage() {
     const { mangaId } = useLocalSearchParams<{ mangaId: string }>();
-    const mangaMetadata = useFetchMangaMetadataById(mangaId);
-    const cover = useFetchCoverByManga(mangaMetadata.data!);
-    const feed = useFetchMangaFeed(mangaId);
+    const metadataQuery = useFetchMangaMetadataById(mangaId);
 
-    const mangaAttributes = mangaMetadata.data?.attributes;
+    return (
+        <GestureHandlerRootView>
+            <QueryStatus query={metadataQuery} name="metadata" />
+            {metadataQuery.data && (
+                <ScrollView>
+                    <DisplayCover manga={metadataQuery.data} />
+                    <DisplayMetadata metadata={metadataQuery.data} />
+                    <DisplayChapters mangaId={mangaId} />
+                </ScrollView>
+            )}
+        </GestureHandlerRootView>
+    );
+}
 
-    const [volumes, setOrderedFeedDataArr] = useState<Volumes[]>();
+function DisplayCover({ manga }: { manga: Manga }) {
+    const coverQuery = useFetchCoverByManga(manga);
 
-    const titleObj = mangaMetadata.data?.attributes.title;
+    return (
+        <>
+            <QueryStatus query={coverQuery} name="cover" />
+            {coverQuery.data && (
+                <Image
+                    key={manga.id}
+                    source={{ uri: coverQuery.data }}
+                    style={{ width: 200, height: 200 }}
+                />
+            )}
+        </>
+    );
+}
+
+function DisplayMetadata({ metadata }: { metadata: Manga }) {
+    const mangaAttributes = metadata.attributes;
+    const titleObj = metadata.attributes.title;
     let title: string = "";
     if (titleObj) {
         title = String(Object.entries(titleObj)[0][1]);
     }
 
-    useEffect(() => {
-        if (!feed.data || feed.data.length === 0) {
-            return;
-        }
+    return (
+        <Text variant="header">
+            title: {title + "\n"}
+            id: {metadata.id + "\n"}
+            demographic: {mangaAttributes.publicationDemographic + "\n"}
+            year: {mangaAttributes.year + "\n"}
+            status: {mangaAttributes.status + "\n"}
+            description: {mangaAttributes.description.en + "\n"}
+        </Text>
+    );
+}
 
-        const feedDataArr = feed.data;
+function DisplayChapters({ mangaId }: { mangaId: string }) {
+    const feedQuery = useFetchMangaFeed(mangaId);
 
-        let volumes: Volumes[] = [];
-        let chapters: Chapters[] = [];
-        let translations: Translation[] = [];
-
-        let previousVolume = feedDataArr[0].attributes.volume;
-        let previousChapter = feedDataArr[0].attributes.chapter;
-
-        feedDataArr.forEach(feedData => {
-            if (previousVolume !== feedData.attributes.volume) {
-                volumes.push({
-                    volume: previousVolume,
-                    chapters: chapters,
-                });
-
-                previousVolume = feedData.attributes.volume;
-                chapters = [];
-            }
-
-            if (previousChapter !== feedData.attributes.chapter) {
-                chapters.push({
-                    chapter: previousChapter,
-                    translations: translations,
-                });
-
-                previousChapter = feedData.attributes.chapter;
-                translations = [];
-            }
-
-            translations.push({
-                lang: feedData.attributes.translatedLanguage,
-                title: feedData.attributes.title,
-                id: feedData.id,
-            });
-        });
-
-        volumes.push({
-            volume: "None",
-            chapters: chapters,
-        });
-        setOrderedFeedDataArr(volumes);
-    }, [feed.data]);
+    let chapter = "";
 
     return (
-        <GestureHandlerRootView>
-            <ScrollView>
-                <Image
-                    key={mangaMetadata.data?.id}
-                    source={{ uri: cover.data }}
-                    style={{ width: 200, height: 200 }}
-                />
-                <Text variant="header">
-                    title: {title + "\n"}
-                    id: {mangaMetadata.data?.id + "\n"}
-                    demographic: {mangaAttributes?.publicationDemographic + "\n"}
-                    year: {mangaAttributes?.year + "\n"}
-                    status: {mangaAttributes?.status + "\n"}
-                    description: {mangaAttributes?.description.en + "\n"}
-                </Text>
+        <>
+            <QueryStatus query={feedQuery} name="feed" />
 
-                {volumes?.map((volume, index) => {
+            {feedQuery.data && feedQuery.data.length === 0 && (
+                <Text style={{ padding: 20, textAlign: "center" }}>No chapters available.</Text>
+            )}
+
+            {feedQuery.data &&
+                feedQuery.data.map((feed, index) => {
+                    if (chapter !== feed.attributes.chapter) {
+                        chapter = feed.attributes.chapter;
+                        return (
+                            <Text key={feed.id}>
+                                Chapter: {chapter + "\n"}
+                                <ChapterLink mangaId={mangaId} data={feed} />
+                            </Text>
+                        );
+                    }
+
                     return (
                         <Text key={index}>
-                            Volume: {volume.volume + "\n"}
-                            {volume.chapters.map((chapter, index) => {
-                                return (
-                                    <Text key={index} style={{ marginLeft: 40 }}>
-                                        Chapter: {chapter.chapter + "\n"}
-                                        {chapter.translations.map((translation, index) => {
-                                            return (
-                                                <Link
-                                                    key={index}
-                                                    style={{ marginLeft: 80, color: "red" }}
-                                                    href={{
-                                                        params: {
-                                                            mangaId: mangaId,
-                                                            chapterId: translation.id,
-                                                        },
-                                                        pathname:
-                                                            "/manga/[mangaId]/chapter/[chapterId]",
-                                                    }}>
-                                                    {translation.lang + "\n"}
-                                                </Link>
-                                            );
-                                        })}
-                                    </Text>
-                                );
-                            })}
+                            <ChapterLink mangaId={mangaId} data={feed} />
                         </Text>
                     );
                 })}
-            </ScrollView>
-        </GestureHandlerRootView>
+        </>
+    );
+}
+
+function ChapterLink({ mangaId, data }: { mangaId: string; data: FeedData }) {
+    return (
+        <Link
+            style={{ marginLeft: 80, color: "red" }}
+            href={{
+                params: {
+                    mangaId: mangaId,
+                    chapterId: data.id,
+                },
+                pathname: "/manga/[mangaId]/chapter/[chapterId]",
+            }}>
+            {data.attributes.translatedLanguage + "\n"}
+        </Link>
     );
 }

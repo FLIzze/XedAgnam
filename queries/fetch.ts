@@ -1,12 +1,4 @@
-import {
-    ChapterInfo,
-    Cover,
-    CoverResponse,
-    FeedData,
-    HomeMangaResponse,
-    Manga,
-    PageResponse,
-} from "@/interface";
+import { ChapterInfo, FeedData, HomeMangaResponse, Manga, PageResponse } from "@/interface";
 import { Filter } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -14,88 +6,110 @@ const apiUrl = "https://api.mangadex.org";
 const uploadApiUrl = "https://uploads.mangadex.org";
 const contentRating = ["safe", "suggestive"];
 const limit = 10;
+const languages = ["en", "fr"];
 
 async function fetchByType(type: Filter): Promise<HomeMangaResponse[]> {
-    let url = `${apiUrl}/manga?order[${type}]=desc`;
+    try {
+        let url = `${apiUrl}/manga?order[${type}]=desc`;
 
-    url = addContentRating(url);
-    url = addLimit(url);
+        url = addContentRating(url);
+        url = addLimit(url);
 
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Error fetching by ${type}`);
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Error fetching by ${type}`);
+        }
+
+        const jsonData = await response.json();
+        const covers: HomeMangaResponse[] = [];
+
+        for (let i = 0; i < limit; i++) {
+            const manga: Manga = jsonData.data[i];
+            const titleObj = manga.attributes.title;
+            const title: string = String(Object.entries(titleObj)[0][1]);
+            const coverUrl = await fetchCoverByManga(manga);
+
+            covers.push({
+                coverUrl,
+                id: manga.id,
+                title,
+            });
+        }
+
+        return covers;
+    } catch (error) {
+        console.error(`fetchByType error:`, error);
+        throw error;
     }
-
-    const jsonData = await response.json();
-    const covers: HomeMangaResponse[] = [];
-
-    for (let i = 0; i < limit; i++) {
-        const manga: Manga = jsonData.data[i];
-        const titleObj = manga.attributes.title;
-        const title: string = String(Object.entries(titleObj)[0][1]);
-        const coverUrl = await fetchCoverByManga(manga);
-
-        const response: HomeMangaResponse = {
-            coverUrl: coverUrl,
-            id: manga.id,
-            title: title,
-        };
-        covers.push(response);
-    }
-
-    return covers;
 }
 
 async function fetchMangaMetadataById(id: string): Promise<Manga> {
-    const response = await fetch(`${apiUrl}/manga/${id}`);
-    if (!response.ok) {
-        throw new Error("Error fetching cover");
+    try {
+        const response = await fetch(`${apiUrl}/manga/${id}`);
+        if (!response.ok) {
+            throw new Error("Error fetching manga metadata");
+        }
+
+        const data = await response.json();
+        return data.data;
+    } catch (error) {
+        console.error(`fetchMangaMetadataById error:`, error);
+        throw error;
     }
-
-    const data = await response.json();
-    const manga: Manga = data.data;
-
-    return manga;
 }
 
 async function fetchCoverByManga(manga: Manga): Promise<string> {
-    const coverRelationShip = manga.relationships.find(el => el.type === "cover_art");
-    const response = await fetch(`${apiUrl}/cover/${coverRelationShip?.id}`);
-    if (!response.ok) {
-        throw new Error("Error fetching cover");
+    try {
+        const coverRelationShip = manga.relationships.find(el => el.type === "cover_art");
+        const response = await fetch(`${apiUrl}/cover/${coverRelationShip?.id}`);
+        if (!response.ok) {
+            throw new Error("Error fetching cover data");
+        }
+
+        const data = await response.json();
+        const fileName = data.data.attributes.fileName;
+
+        const coverResponse = await fetch(`${uploadApiUrl}/covers/${manga.id}/${fileName}`);
+        if (!coverResponse.ok) {
+            throw new Error("Error fetching cover image");
+        }
+
+        return coverResponse.url;
+    } catch (error) {
+        console.error(`fetchCoverByManga error:`, error);
+        throw error;
     }
-
-    const data = await response.json();
-    const cover: Cover = data.data;
-    const fileName = cover.attributes.fileName;
-
-    const cover_response: CoverResponse = await fetch(
-        `${uploadApiUrl}/covers/${manga.id}/${fileName}`
-    );
-    return cover_response.url;
 }
 
 async function fetchPageByChapter(chapterInfo: ChapterInfo, index: number): Promise<string> {
-    const uploadResponse = await fetch(
-        `${uploadApiUrl}/data/${chapterInfo.hash}/${chapterInfo.data[index]}`
-    );
-    if (!uploadResponse.ok) {
-        throw new Error("Error fetching pages");
-    }
+    try {
+        const response = await fetch(
+            `${uploadApiUrl}/data-saver/${chapterInfo.hash}/${chapterInfo.dataSaver[index]}`
+        );
+        if (!response.ok) {
+            throw new Error("Error fetching chapter page");
+        }
 
-    return uploadResponse.url;
+        return response.url;
+    } catch (error) {
+        console.error(`fetchPageByChapter error:`, error);
+        throw error;
+    }
 }
 
 async function fetchPageResponse(id: string): Promise<PageResponse> {
-    const response = await fetch(`${apiUrl}/at-home/server/${id}`);
-    if (!response.ok) {
-        throw new Error("Error fetching at-home/server");
+    try {
+        const response = await fetch(`${apiUrl}/at-home/server/${id}`);
+        if (!response.ok) {
+            throw new Error("Error fetching page response");
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(`fetchPageResponse error:`, error);
+        throw error;
     }
-
-    const data = await response.json();
-    const pageResponse: PageResponse = data;
-
-    return pageResponse;
 }
 
 function addContentRating(url: string): string {
@@ -147,9 +161,13 @@ export function useFetchPageResponse(id: string) {
 }
 
 async function fetchMangaFeed(mangaId: string): Promise<FeedData[]> {
-    const response = await fetch(
+    const url = new URL(
         `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc&limit=100`
     );
+    languages.forEach(lang => url.searchParams.append("translatedLanguage[]", lang));
+
+    const response = await fetch(url);
+
     if (!response.ok) {
         throw new Error("Error fetching manga feed.");
     }

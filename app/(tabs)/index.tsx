@@ -1,7 +1,6 @@
 import Text from "@/components/common/Text";
 import { useFetchByType } from "@/queries/fetch";
 import { Link } from "expo-router";
-import { ActivityIndicator } from "react-native";
 import { useHasOnBoarded } from "@/hooks/useHasOnBoarded";
 import Box from "@/components/common/Box";
 import MangaHorizontalList from "@/components/home/MangaHorizontalList";
