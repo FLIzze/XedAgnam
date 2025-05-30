@@ -28,11 +28,13 @@ function DisplayCover({ type, index }: { type: Filter; index: number }) {
             <QueryStatus query={mangaResponseQuery} name="cover" />
             {mangaResponseQuery.data && (
                 <Text>
-                    <Image
-                        key={mangaResponseQuery.data.id}
-                        source={{ uri: mangaResponseQuery.data.coverUrl }}
-                        style={{ width: 120, height: 180, objectFit: "cover" }}
-                    />
+                    <Pressable onPress={() => router.push(`/manga/${mangaResponseQuery.data.id}`)}>
+                        <Image
+                            key={mangaResponseQuery.data.id}
+                            source={{ uri: mangaResponseQuery.data.coverUrl }}
+                            style={{ width: 120, height: 180, objectFit: "cover" }}
+                        />
+                    </Pressable>
                 </Text>
             )}
         </>
