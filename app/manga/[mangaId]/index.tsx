@@ -1,6 +1,6 @@
 import Text from "@/components/common/Text";
 import { QueryStatus } from "@/components/QueryStatus";
-import { FeedData, Manga } from "@/interface";
+import { Manga } from "@/interface";
 import {
     useFetchCoverByManga,
     useFetchMangaMetadataById,
@@ -68,8 +68,6 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
 function DisplayChapters({ mangaId }: { mangaId: string }) {
     const feedQuery = useFetchMangaFeed(mangaId);
 
-    let chapter = "";
-
     return (
         <>
             <QueryStatus query={feedQuery} name="feed" />
@@ -79,39 +77,20 @@ function DisplayChapters({ mangaId }: { mangaId: string }) {
             )}
 
             {feedQuery.data &&
-                feedQuery.data.map((feed, index) => {
-                    if (chapter !== feed.attributes.chapter) {
-                        chapter = feed.attributes.chapter;
-                        return (
-                            <Text key={feed.id}>
-                                Chapter: {chapter + "\n"}
-                                <ChapterLink mangaId={mangaId} data={feed} />
-                            </Text>
-                        );
-                    }
-
-                    return (
-                        <Text key={index}>
-                            <ChapterLink mangaId={mangaId} data={feed} />
-                        </Text>
-                    );
-                })}
+                feedQuery.data.map(feed => (
+                    <Link
+                        key={feed.id}
+                        style={{ marginLeft: 80, color: "red", textAlign: "center" }}
+                        href={{
+                            params: {
+                                mangaId: mangaId,
+                                chapterId: feed.id,
+                            },
+                            pathname: "/manga/[mangaId]/chapter/[chapterId]",
+                        }}>
+                        {feed.attributes.chapter + "\n"}
+                    </Link>
+                ))}
         </>
-    );
-}
-
-function ChapterLink({ mangaId, data }: { mangaId: string; data: FeedData }) {
-    return (
-        <Link
-            style={{ marginLeft: 80, color: "red" }}
-            href={{
-                params: {
-                    mangaId: mangaId,
-                    chapterId: data.id,
-                },
-                pathname: "/manga/[mangaId]/chapter/[chapterId]",
-            }}>
-            {data.attributes.translatedLanguage + "\n"}
-        </Link>
     );
 }

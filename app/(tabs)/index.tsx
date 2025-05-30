@@ -5,12 +5,9 @@ import { useHasOnBoarded } from "@/hooks/useHasOnBoarded";
 import Box from "@/components/common/Box";
 import MangaHorizontalList from "@/components/home/MangaHorizontalList";
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
+import { QueryStatus } from "@/components/QueryStatus";
 
 export default function HomePage() {
-    const followedCount = useFetchByType("followedCount");
-    const latestUploadedChapter = useFetchByType("latestUploadedChapter");
-    const relevance = useFetchByType("relevance");
-
     const { hasOnBoarded, checkedStorage } = useHasOnBoarded();
 
     // if (!checkedStorage || hasOnBoarded === null) return null;
@@ -19,12 +16,9 @@ export default function HomePage() {
         <GestureHandlerRootView>
             <ScrollView nestedScrollEnabled={true}>
                 <Box gap={"md"}>
-                    <MangaHorizontalList type="Most Followed" mangaList={followedCount.data} />
-                    <MangaHorizontalList
-                        type="Latest Updates"
-                        mangaList={latestUploadedChapter.data}
-                    />
-                    <MangaHorizontalList type="Recommanded for you" mangaList={relevance.data} />
+                    <MangaHorizontalList type="followedCount" />
+                    <MangaHorizontalList type="latestUploadedChapter" />
+                    <MangaHorizontalList type="relevance" />
 
                     <Link href={"/onboarding"}>
                         <Text color={"accent"}>Onboarding</Text>

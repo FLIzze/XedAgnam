@@ -5,15 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 const apiUrl = "https://api.mangadex.org";
 const uploadApiUrl = "https://uploads.mangadex.org";
 const contentRating = ["safe", "suggestive"];
-const limit = 10;
-const languages = ["en", "fr"];
+const languages = ["en"];
 
-async function fetchByType(type: Filter): Promise<HomeMangaResponse[]> {
+async function fetchByType(type: Filter, index: number): Promise<HomeMangaResponse> {
     try {
         let url = `${apiUrl}/manga?order[${type}]=desc`;
 
         url = addContentRating(url);
-        url = addLimit(url);
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -21,22 +19,19 @@ async function fetchByType(type: Filter): Promise<HomeMangaResponse[]> {
         }
 
         const jsonData = await response.json();
-        const covers: HomeMangaResponse[] = [];
 
-        for (let i = 0; i < limit; i++) {
-            const manga: Manga = jsonData.data[i];
-            const titleObj = manga.attributes.title;
-            const title: string = String(Object.entries(titleObj)[0][1]);
-            const coverUrl = await fetchCoverByManga(manga);
+        const manga: Manga = jsonData.data[index];
+        const titleObj = manga.attributes.title;
+        const title: string = String(Object.entries(titleObj)[0][1]);
+        const coverUrl = await fetchCoverByManga(manga);
 
-            covers.push({
-                coverUrl,
-                id: manga.id,
-                title,
-            });
-        }
+        const cover = {
+            coverUrl,
+            id: manga.id,
+            title,
+        };
 
-        return covers;
+        return cover;
     } catch (error) {
         console.error(`fetchByType error:`, error);
         throw error;
@@ -120,15 +115,11 @@ function addContentRating(url: string): string {
     return url;
 }
 
-function addLimit(url: string): string {
-    return url + `&limit=${limit}`;
-}
-
-export function useFetchByType(fetchType: "followedCount" | "latestUploadedChapter" | "relevance") {
+export function useFetchByType(fetchType: Filter, index: number) {
     return useQuery({
-        queryKey: ["mangas", fetchType],
-        queryFn: async (): Promise<HomeMangaResponse[]> => {
-            return fetchByType(fetchType);
+        queryKey: ["mangas", fetchType, index],
+        queryFn: async (): Promise<HomeMangaResponse> => {
+            return fetchByType(fetchType, index);
         },
     });
 }

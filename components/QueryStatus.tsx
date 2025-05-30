@@ -19,14 +19,14 @@ export function QueryStatus({ query, name }: { query: UseQueryResult<unknown>; n
 
     if (query.isError || !query) {
         return (
-            <View
+            <Text
                 style={{
                     height: windowWidth * 1.5,
                     justifyContent: "center",
                     alignItems: "center",
                 }}>
-                <Text>Error loading {name}</Text>
-            </View>
+                Error loading {name}
+            </Text>
         );
     }
 
