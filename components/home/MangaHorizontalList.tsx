@@ -1,18 +1,20 @@
 import { Pressable } from "react-native-gesture-handler";
 import Box from "../common/Box";
-import { ActivityIndicator, FlatList, Image, ScrollView, StyleSheet } from "react-native";
+import { Image, ScrollView, StyleSheet } from "react-native";
 import Text from "../common/Text";
 import { router } from "expo-router";
-import { HomeMangaResponse } from "@/interface";
 import { useFetchByType } from "@/queries/fetch";
 import { Filter } from "@/types";
 import { QueryStatus } from "../QueryStatus";
+
+// nbr of manga displayed in home
+const limit = 10;
 
 export default function MangaHorizontalList({ type }: { type: Filter }) {
     return (
         <Box gap={"sm"}>
             <ScrollView horizontal={true}>
-                {Array.from({ length: 10 }, (_, index) => (
+                {Array.from({ length: limit }, (_, index) => (
                     <DisplayCover type={type} index={index} key={index} />
                 ))}
             </ScrollView>

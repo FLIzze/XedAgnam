@@ -5,13 +5,15 @@ import { useQuery } from "@tanstack/react-query";
 const apiUrl = "https://api.mangadex.org";
 const uploadApiUrl = "https://uploads.mangadex.org";
 const contentRating = ["safe", "suggestive"];
-const languages = ["en"];
+const lang = "en";
 
 async function fetchByType(type: Filter, index: number): Promise<HomeMangaResponse> {
     try {
-        let url = `${apiUrl}/manga?order[${type}]=desc`;
-
-        url = addContentRating(url);
+        let url = new URL(
+            `${apiUrl}/manga?order[${type}]=desc&hasAvailableChapters=1&availableTranslatedLanguage=${lang}`
+        );
+        url.searchParams.append("availableTranslatedLanguage[]", lang);
+        contentRating.forEach(rating => url.searchParams.append("contentRating[]", rating));
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -46,6 +48,7 @@ async function fetchMangaMetadataById(id: string): Promise<Manga> {
         }
 
         const data = await response.json();
+        console.log(data.data);
         return data.data;
     } catch (error) {
         console.error(`fetchMangaMetadataById error:`, error);
@@ -107,14 +110,6 @@ async function fetchPageResponse(id: string): Promise<PageResponse> {
     }
 }
 
-function addContentRating(url: string): string {
-    contentRating.forEach((rating: string) => {
-        url += `&contentRating[]=${rating}`;
-    });
-
-    return url;
-}
-
 export function useFetchByType(fetchType: Filter, index: number) {
     return useQuery({
         queryKey: ["mangas", fetchType, index],
@@ -153,9 +148,9 @@ export function useFetchPageResponse(id: string) {
 
 async function fetchMangaFeed(mangaId: string): Promise<FeedData[]> {
     const url = new URL(
-        `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc&limit=100`
+        `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc&limit=50&includeExternalUrl=0`
     );
-    languages.forEach(lang => url.searchParams.append("translatedLanguage[]", lang));
+    url.searchParams.append("translatedLanguage[]", lang);
 
     const response = await fetch(url);
 

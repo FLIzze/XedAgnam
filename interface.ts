@@ -32,6 +32,21 @@ interface Attributes {
     publicationDemographic: string;
     status: string;
     year: number;
+    tags: Tags[];
+    availableTranslatedLanguages: string[];
+}
+
+interface Tags {
+    id: string;
+    attributes: TagAttributes;
+}
+
+interface TagAttributes {
+    name: Langs;
+}
+
+interface Langs {
+    en: string;
 }
 
 interface Relationships {

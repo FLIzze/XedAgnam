@@ -1,6 +1,6 @@
 import { useFetchPageByChapter, useFetchPageResponse } from "@/queries/fetch";
 import { useLocalSearchParams } from "expo-router/build/hooks";
-import { Dimensions, FlatList, Image } from "react-native";
+import { Dimensions, FlatList, Image, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ChapterInfo } from "@/interface";
 import { QueryStatus } from "@/components/QueryStatus";
@@ -33,7 +33,7 @@ function PageImage({ chapterInfo, index }: { chapterInfo: ChapterInfo; index: nu
     const windowWidth = Dimensions.get("window").width;
 
     return (
-        <>
+        <Text>
             <QueryStatus query={chapterQuery} name="image" />;
             {chapterQuery.data && (
                 <Image
@@ -46,6 +46,6 @@ function PageImage({ chapterInfo, index }: { chapterInfo: ChapterInfo; index: nu
                     }}
                 />
             )}
-        </>
+        </Text>
     );
 }

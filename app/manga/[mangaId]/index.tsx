@@ -61,6 +61,10 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
             year: {mangaAttributes.year + "\n"}
             status: {mangaAttributes.status + "\n"}
             description: {mangaAttributes.description.en + "\n"}
+            Tags: {"\n"}
+            {mangaAttributes.tags.map(attribute => (
+                <Text key={attribute.id}>{attribute.attributes.name.en + "\n"}</Text>
+            ))}
         </Text>
     );
 }
