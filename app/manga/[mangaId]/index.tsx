@@ -18,11 +18,13 @@ export default function MangaPage() {
         <GestureHandlerRootView>
             <QueryStatus query={metadataQuery} name="metadata" />
             {metadataQuery.data && (
-                <ScrollView>
-                    <DisplayCover manga={metadataQuery.data} />
-                    <DisplayMetadata metadata={metadataQuery.data} />
+                <>
+                    <ScrollView>
+                        <DisplayCover manga={metadataQuery.data} />
+                        <DisplayMetadata metadata={metadataQuery.data} />
+                    </ScrollView>
                     <DisplayChapters mangaId={mangaId} />
-                </ScrollView>
+                </>
             )}
         </GestureHandlerRootView>
     );
