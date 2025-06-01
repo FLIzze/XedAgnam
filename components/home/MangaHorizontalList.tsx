@@ -1,85 +1,40 @@
-import { Pressable } from "react-native-gesture-handler";
-import Box from "../common/Box";
-import { Image, ScrollView, StyleSheet } from "react-native";
-import Text from "../common/Text";
+import { FlatList, Pressable } from "react-native-gesture-handler";
+import { Image } from "react-native";
 import { router } from "expo-router";
-import { useFetchByType } from "@/queries/fetch";
+import { useFetchByType, useFetchCoverByManga } from "@/queries/fetch";
 import { Filter } from "@/types";
 import { QueryStatus } from "../QueryStatus";
-
-// nbr of manga displayed in home
-const limit = 10;
+import { Manga } from "@/interface";
 
 export default function MangaHorizontalList({ type }: { type: Filter }) {
-    return (
-        <Box gap={"sm"}>
-            <ScrollView horizontal={true}>
-                {Array.from({ length: limit }, (_, index) => (
-                    <DisplayCover type={type} index={index} key={index} />
-                ))}
-            </ScrollView>
-        </Box>
-    );
-}
-
-function DisplayCover({ type, index }: { type: Filter; index: number }) {
-    const mangaResponseQuery = useFetchByType(type, index);
+    const mangaQuery = useFetchByType(type);
 
     return (
         <>
-            <QueryStatus query={mangaResponseQuery} name="cover" />
-            {mangaResponseQuery.data && (
-                <Text>
-                    <Pressable onPress={() => router.push(`/manga/${mangaResponseQuery.data.id}`)}>
-                        <Image
-                            key={mangaResponseQuery.data.id}
-                            source={{ uri: mangaResponseQuery.data.coverUrl }}
-                            style={{ width: 120, height: 180, objectFit: "cover" }}
-                        />
-                    </Pressable>
-                </Text>
+            <QueryStatus query={mangaQuery} name="mangaResponse" />
+            {mangaQuery.data && (
+                <FlatList
+                    horizontal={true}
+                    data={mangaQuery.data}
+                    renderItem={({ item }) => <DisplayManga manga={item} />}
+                />
             )}
         </>
     );
 }
 
-const styles = StyleSheet.create({
-    outlinedText: {
-        fontWeight: "bold",
-        textShadowColor: "#000000",
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 1,
-    },
-});
+function DisplayManga({ manga }: { manga: Manga }) {
+    const coverQuery = useFetchCoverByManga(manga);
 
-// <FlatList
-//     horizontal={true}
-//     showsHorizontalScrollIndicator={false}
-//     ListHeaderComponent={<Box paddingLeft={"md"} />}
-//     ListFooterComponent={<Box paddingRight={"md"} />}
-//     ItemSeparatorComponent={() => <Box paddingLeft={"sm"} />}
-//     bounces={false}
-//     overScrollMode="never"
-//     data={mangaList}
-//     renderItem={({ item, index }) => (
-//         <Box key={item.id} width={120}>
-//             <Pressable onPress={() => router.push(`/manga/${item.id}`)}>
-//                 <Image
-//                     key={item.id}
-//                     source={{ uri: item.coverUrl }}
-//                     style={{ width: 120, height: 180, objectFit: "cover" }}
-//                 />
-//             </Pressable>
-//             <Text
-//                 color={"textPrimary"}
-//                 fontSize={26}
-//                 marginTop={"-md"}
-//                 style={styles.outlinedText}>
-//                 {index + 1}
-//             </Text>
-//             <Text color={"textPrimary"} fontSize={11} numberOfLines={2}>
-//                 {item.title}
-//             </Text>
-//         </Box>
-//     )}
-// />
+    return (
+        <Pressable onPress={() => router.push(`/manga/${manga.id}`)}>
+            <QueryStatus query={coverQuery} name="mangaResponse" />
+            {coverQuery.data && (
+                <Image
+                    source={{ uri: coverQuery.data }}
+                    style={{ width: 120, height: 180, resizeMode: "cover" }}
+                />
+            )}
+        </Pressable>
+    );
+}

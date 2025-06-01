@@ -1,43 +1,40 @@
-import { useFetchPageByChapter, useFetchPageResponse } from "@/queries/fetch";
+import { useFetchPage as useFetchPage, useFetchPageResponse } from "@/queries/fetch";
 import { useLocalSearchParams } from "expo-router/build/hooks";
-import { Dimensions, FlatList, Image, Text } from "react-native";
+import { Dimensions, FlatList, Image } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { ChapterInfo } from "@/interface";
 import { QueryStatus } from "@/components/QueryStatus";
 
 export default function ChapterPage() {
     const { chapterId } = useLocalSearchParams<{ chapterId: string }>();
     const pageResponseQuery = useFetchPageResponse(chapterId);
 
+    const chapter = pageResponseQuery.data?.chapter;
+    const pages = chapter?.dataSaver ?? [];
+    const hash = chapter?.hash;
+
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <QueryStatus query={pageResponseQuery} name="pageResponse" />
-            {pageResponseQuery.data && (
+            {hash && pages && (
                 <FlatList
-                    data={Array.from(
-                        { length: pageResponseQuery.data.chapter.data.length },
-                        (_, index) => index
-                    )}
-                    keyExtractor={index => index.toString()}
-                    renderItem={({ item: index }) => (
-                        <PageImage chapterInfo={pageResponseQuery.data.chapter} index={index} />
-                    )}
+                    data={pages}
+                    renderItem={({ item }) => <PageImage pageUrl={item} hash={hash} />}
                 />
             )}
         </GestureHandlerRootView>
     );
 }
 
-function PageImage({ chapterInfo, index }: { chapterInfo: ChapterInfo; index: number }) {
-    const chapterQuery = useFetchPageByChapter(chapterInfo, index);
+function PageImage({ pageUrl: dataSaver, hash }: { pageUrl: string; hash: string }) {
+    const pageQuery = useFetchPage(dataSaver, hash);
     const windowWidth = Dimensions.get("window").width;
 
     return (
-        <Text>
-            <QueryStatus query={chapterQuery} name="image" />;
-            {chapterQuery.data && (
+        <>
+            <QueryStatus query={pageQuery} name="image" />
+            {pageQuery.data && (
                 <Image
-                    source={{ uri: chapterQuery.data }}
+                    source={{ uri: pageQuery.data }}
                     style={{
                         marginTop: 10,
                         width: windowWidth,
@@ -46,6 +43,6 @@ function PageImage({ chapterInfo, index }: { chapterInfo: ChapterInfo; index: nu
                     }}
                 />
             )}
-        </Text>
+        </>
     );
 }

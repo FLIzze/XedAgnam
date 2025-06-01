@@ -1,16 +1,16 @@
-import { ChapterInfo, FeedData, HomeMangaResponse, Manga, PageResponse } from "@/interface";
+import { ChapterInfo, FeedData, Manga, PageResponse } from "@/interface";
 import { Filter } from "@/types";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 const apiUrl = "https://api.mangadex.org";
 const uploadApiUrl = "https://uploads.mangadex.org";
 const contentRating = ["safe", "suggestive"];
 const lang = "en";
 
-async function fetchByType(type: Filter, index: number): Promise<HomeMangaResponse> {
+async function fetchByType(type: Filter): Promise<Manga[]> {
     try {
         let url = new URL(
-            `${apiUrl}/manga?order[${type}]=desc&hasAvailableChapters=1&availableTranslatedLanguage=${lang}`
+            `${apiUrl}/manga?order[${type}]=desc&hasAvailableChapters=1&availableTranslatedLanguage=${lang}&limit=10`
         );
         url.searchParams.append("availableTranslatedLanguage[]", lang);
         contentRating.forEach(rating => url.searchParams.append("contentRating[]", rating));
@@ -20,20 +20,8 @@ async function fetchByType(type: Filter, index: number): Promise<HomeMangaRespon
             throw new Error(`Error fetching by ${type}`);
         }
 
-        const jsonData = await response.json();
-
-        const manga: Manga = jsonData.data[index];
-        const titleObj = manga.attributes.title;
-        const title: string = String(Object.entries(titleObj)[0][1]);
-        const coverUrl = await fetchCoverByManga(manga);
-
-        const cover = {
-            coverUrl,
-            id: manga.id,
-            title,
-        };
-
-        return cover;
+        const mangaList = await response.json();
+        return mangaList.data;
     } catch (error) {
         console.error(`fetchByType error:`, error);
         throw error;
@@ -48,7 +36,6 @@ async function fetchMangaMetadataById(id: string): Promise<Manga> {
         }
 
         const data = await response.json();
-        console.log(data.data);
         return data.data;
     } catch (error) {
         console.error(`fetchMangaMetadataById error:`, error);
@@ -79,11 +66,9 @@ async function fetchCoverByManga(manga: Manga): Promise<string> {
     }
 }
 
-async function fetchPageByChapter(chapterInfo: ChapterInfo, index: number): Promise<string> {
+async function fetchPageByChapter(pageUrl: string, hash: string): Promise<string> {
     try {
-        const response = await fetch(
-            `${uploadApiUrl}/data-saver/${chapterInfo.hash}/${chapterInfo.dataSaver[index]}`
-        );
+        const response = await fetch(`${uploadApiUrl}/data-saver/${hash}/${pageUrl}`);
         if (!response.ok) {
             throw new Error("Error fetching chapter page");
         }
@@ -110,11 +95,11 @@ async function fetchPageResponse(id: string): Promise<PageResponse> {
     }
 }
 
-export function useFetchByType(fetchType: Filter, index: number) {
+export function useFetchByType(fetchType: Filter) {
     return useQuery({
-        queryKey: ["mangas", fetchType, index],
-        queryFn: async (): Promise<HomeMangaResponse> => {
-            return fetchByType(fetchType, index);
+        queryKey: ["mangas", fetchType],
+        queryFn: async (): Promise<Manga[]> => {
+            return fetchByType(fetchType);
         },
     });
 }
@@ -130,7 +115,7 @@ export function useFetchMangaMetadataById(id: string) {
 
 export function useFetchCoverByManga(manga: Manga) {
     return useQuery({
-        queryKey: ["cover", manga],
+        queryKey: ["cover", manga.id],
         queryFn: async (): Promise<string> => {
             return fetchCoverByManga(manga);
         },
@@ -146,9 +131,9 @@ export function useFetchPageResponse(id: string) {
     });
 }
 
-async function fetchMangaFeed(mangaId: string): Promise<FeedData[]> {
+export async function fetchMangaFeed(mangaId: string, offset: string): Promise<FeedData[]> {
     const url = new URL(
-        `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc&limit=50&includeExternalUrl=0`
+        `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc&limit=50&includeExternalUrl=0&offset=${offset}`
     );
     url.searchParams.append("translatedLanguage[]", lang);
 
@@ -163,16 +148,23 @@ async function fetchMangaFeed(mangaId: string): Promise<FeedData[]> {
     return data.data;
 }
 
-export function useFetchMangaFeed(mangaId: string) {
-    return useQuery({
+export function useFetchMangaFeed(mangaId: string, limit = 50) {
+    return useInfiniteQuery({
         queryKey: ["feed", mangaId],
-        queryFn: () => fetchMangaFeed(mangaId),
+        queryFn: async ({ pageParam = 0 }) => {
+            const offset = pageParam;
+            const chapters = await fetchMangaFeed(mangaId, offset.toString());
+            return chapters;
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) =>
+            lastPage.length === limit ? allPages.length * limit : undefined,
     });
 }
 
-export function useFetchPageByChapter(chapterInfo: ChapterInfo, index: number) {
+export function useFetchPage(pageUrl: string, hash: string) {
     return useQuery({
-        queryKey: ["chapterPage", chapterInfo.hash, index],
-        queryFn: () => fetchPageByChapter(chapterInfo, index),
+        queryKey: ["chapterPage", pageUrl],
+        queryFn: () => fetchPageByChapter(pageUrl, hash),
     });
 }

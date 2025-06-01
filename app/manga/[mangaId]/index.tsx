@@ -1,13 +1,13 @@
 import Text from "@/components/common/Text";
 import { QueryStatus } from "@/components/QueryStatus";
-import { Manga } from "@/interface";
+import { FeedData, Manga } from "@/interface";
 import {
     useFetchCoverByManga,
-    useFetchMangaMetadataById,
     useFetchMangaFeed,
+    useFetchMangaMetadataById,
 } from "@/queries/fetch";
 import { Link, useLocalSearchParams } from "expo-router";
-import { Image } from "react-native";
+import { Image, ActivityIndicator, FlatList } from "react-native";
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 
 export default function MangaPage() {
@@ -35,11 +35,7 @@ function DisplayCover({ manga }: { manga: Manga }) {
         <>
             <QueryStatus query={coverQuery} name="cover" />
             {coverQuery.data && (
-                <Image
-                    key={manga.id}
-                    source={{ uri: coverQuery.data }}
-                    style={{ width: 200, height: 200 }}
-                />
+                <Image source={{ uri: coverQuery.data }} style={{ width: 200, height: 200 }} />
             )}
         </>
     );
@@ -70,31 +66,50 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
 }
 
 function DisplayChapters({ mangaId }: { mangaId: string }) {
-    const feedQuery = useFetchMangaFeed(mangaId);
+    const limit = 50;
+    const chapterQuery = useFetchMangaFeed(mangaId, limit);
+    const chapters = chapterQuery.data?.pages.flat() ?? [];
 
     return (
         <>
-            <QueryStatus query={feedQuery} name="feed" />
-
-            {feedQuery.data && feedQuery.data.length === 0 && (
-                <Text style={{ padding: 20, textAlign: "center" }}>No chapters available.</Text>
-            )}
-
-            {feedQuery.data &&
-                feedQuery.data.map(feed => (
-                    <Link
-                        key={feed.id}
-                        style={{ marginLeft: 80, color: "red", textAlign: "center" }}
-                        href={{
-                            params: {
-                                mangaId: mangaId,
-                                chapterId: feed.id,
-                            },
-                            pathname: "/manga/[mangaId]/chapter/[chapterId]",
-                        }}>
-                        {feed.attributes.chapter + "\n"}
-                    </Link>
-                ))}
+            <QueryStatus query={chapterQuery} name="chapters" />
+            <FlatList
+                data={chapters}
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => <DisplayChaptersLink item={item} mangaId={mangaId} />}
+                onEndReached={() => {
+                    if (chapterQuery.hasNextPage && !chapterQuery.isFetchingNextPage) {
+                        chapterQuery.fetchNextPage();
+                    }
+                }}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={
+                    chapterQuery.isFetchingNextPage ? <ActivityIndicator size="large" /> : null
+                }
+                ListEmptyComponent={<Text>No chapters available.</Text>}
+            />
         </>
+    );
+}
+
+function DisplayChaptersLink({ item, mangaId }: { item: FeedData; mangaId: string }) {
+    return (
+        <Link
+            key={item.id}
+            style={{
+                marginVertical: 10,
+                marginLeft: 80,
+                color: "red",
+                textAlign: "center",
+            }}
+            href={{
+                params: {
+                    mangaId,
+                    chapterId: item.id,
+                },
+                pathname: "/manga/[mangaId]/chapter/[chapterId]",
+            }}>
+            {item.attributes.chapter}
+        </Link>
     );
 }
