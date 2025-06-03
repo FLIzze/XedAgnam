@@ -68,7 +68,7 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
 }
 
 function DisplayChapters({ mangaId }: { mangaId: string }) {
-    const limit = 50;
+    const limit = 40;
     const chapterQuery = useFetchMangaFeed(mangaId, limit);
     const chapters = chapterQuery.data?.pages.flat() ?? [];
 

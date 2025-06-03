@@ -1,4 +1,4 @@
-import { ChapterInfo, FeedData, Manga, PageResponse } from "@/interface";
+import { FeedData, Manga, PageResponse } from "@/interface";
 import { Filter } from "@/types";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
@@ -10,9 +10,8 @@ const lang = "en";
 async function fetchByType(type: Filter): Promise<Manga[]> {
     try {
         let url = new URL(
-            `${apiUrl}/manga?order[${type}]=desc&hasAvailableChapters=1&availableTranslatedLanguage=${lang}&limit=10`
+            `${apiUrl}/manga?order[${type}]=desc&hasAvailableChapters=1&availableTranslatedLanguage[]=${lang}&limit=10`
         );
-        url.searchParams.append("availableTranslatedLanguage[]", lang);
         contentRating.forEach(rating => url.searchParams.append("contentRating[]", rating));
 
         const response = await fetch(url);
@@ -131,29 +130,39 @@ export function useFetchPageResponse(id: string) {
     });
 }
 
-export async function fetchMangaFeed(mangaId: string, offset: string): Promise<FeedData[]> {
-    const url = new URL(
-        `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc&limit=50&includeExternalUrl=0&offset=${offset}`
-    );
-    url.searchParams.append("translatedLanguage[]", lang);
+export async function fetchMangaFeed(
+    mangaId: string,
+    offset: number,
+    limit: number
+): Promise<FeedData[]> {
+    try {
+        const url = new URL(
+            `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc&limit=${limit}&includeExternalUrl=0&offset=${offset}`
+        );
+        url.searchParams.append("translatedLanguage[]", lang);
 
-    const response = await fetch(url);
+        const response = await fetch(url);
 
-    if (!response.ok) {
-        throw new Error("Error fetching manga feed.");
+        if (!response.ok) {
+            throw new Error("Error fetching manga feed.");
+        }
+
+        const data = await response.json();
+
+        return data.data;
+    } catch (error) {
+        console.error(`fetchMangaFeed error:`, error);
+        throw error;
     }
-
-    const data = await response.json();
-
-    return data.data;
 }
 
-export function useFetchMangaFeed(mangaId: string, limit = 50) {
+export function useFetchMangaFeed(mangaId: string, limit: number) {
     return useInfiniteQuery({
         queryKey: ["feed", mangaId],
         queryFn: async ({ pageParam = 0 }) => {
             const offset = pageParam;
-            const chapters = await fetchMangaFeed(mangaId, offset.toString());
+
+            const chapters = await fetchMangaFeed(mangaId, offset, limit);
             return chapters;
         },
         initialPageParam: 0,
