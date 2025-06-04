@@ -14,9 +14,9 @@ export default function HomePage() {
         <GestureHandlerRootView>
             <ScrollView nestedScrollEnabled={true}>
                 <Box gap={"md"}>
-                    <MangaHorizontalList type="followedCount" />
-                    <MangaHorizontalList type="latestUploadedChapter" />
-                    <MangaHorizontalList type="relevance" />
+                    <MangaHorizontalList listTitle="Most Followed" type="followedCount" />
+                    <MangaHorizontalList listTitle="Latest Updates" type="latestUploadedChapter" />
+                    <MangaHorizontalList listTitle="Recommanded for you" type="relevance" />
 
                     <Link href={"/onboarding"}>
                         <Text color={"accent"}>Onboarding</Text>

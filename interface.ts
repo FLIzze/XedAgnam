@@ -34,6 +34,7 @@ interface Attributes {
     year: number;
     tags: Tags[];
     availableTranslatedLanguages: string[];
+    originalLanguage: string;
 }
 
 interface Tags {

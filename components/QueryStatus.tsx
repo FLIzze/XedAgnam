@@ -1,19 +1,16 @@
 import { UseQueryResult } from "@tanstack/react-query";
-import { ActivityIndicator, Dimensions, Text, View } from "react-native";
+import { ActivityIndicator, Dimensions } from "react-native";
+import Box from "./common/Box";
+import Text from "./common/Text";
 
 export function QueryStatus({ query, name }: { query: UseQueryResult<unknown>; name: string }) {
     const windowWidth = Dimensions.get("window").width;
 
     if (query.isLoading) {
         return (
-            <View
-                style={{
-                    height: windowWidth * 1.5,
-                    justifyContent: "center",
-                    alignItems: "center",
-                }}>
+            <Box alignItems={"center"} justifyContent={"center"} height={180}>
                 <ActivityIndicator size="large" />
-            </View>
+            </Box>
         );
     }
 
