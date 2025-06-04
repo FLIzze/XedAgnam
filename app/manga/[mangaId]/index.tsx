@@ -1,3 +1,4 @@
+import Box from "@/components/common/Box";
 import Text from "@/components/common/Text";
 import { QueryStatus } from "@/components/QueryStatus";
 import { FeedData, Manga } from "@/interface";
@@ -6,9 +7,10 @@ import {
     useFetchMangaFeed,
     useFetchMangaMetadataById,
 } from "@/queries/fetch";
-import { Link, useLocalSearchParams } from "expo-router";
-import { Image, ActivityIndicator, FlatList } from "react-native";
-import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Link, router, useLocalSearchParams } from "expo-router";
+import { Image, ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
 
 export default function MangaPage() {
     const { mangaId } = useLocalSearchParams<{ mangaId: string }>();
@@ -16,14 +18,35 @@ export default function MangaPage() {
 
     return (
         <GestureHandlerRootView>
+            <Box
+                height={64}
+                flexDirection={"row"}
+                alignItems={"flex-end"}
+                justifyContent={"space-between"}
+                paddingHorizontal={"sm"}
+                zIndex={99}>
+                <Pressable onPress={router.back}>
+                    <Ionicons name="chevron-back" size={28} color="white" />
+                </Pressable>
+                <Pressable
+                    onPress={() =>
+                        router.push({
+                            pathname: `/manga/[mangaId]/about`,
+                            params: {
+                                mangaId: mangaId,
+                                status: metadataQuery.data?.attributes.status,
+                                description: metadataQuery.data?.attributes.description.en,
+                            },
+                        })
+                    }>
+                    <Ionicons name="information-circle" size={28} color="white" />
+                </Pressable>
+            </Box>
             <QueryStatus query={metadataQuery} name="metadata" />
             {metadataQuery.data && (
                 <>
-                    <ScrollView>
-                        <DisplayCover manga={metadataQuery.data} />
-                        <DisplayMetadata metadata={metadataQuery.data} />
-                    </ScrollView>
-                    <DisplayChapters mangaId={mangaId} />
+                    <DisplayCover manga={metadataQuery.data} />
+                    <DisplayChapters metadata={metadataQuery.data} mangaId={mangaId} />
                 </>
             )}
         </GestureHandlerRootView>
@@ -37,7 +60,13 @@ function DisplayCover({ manga }: { manga: Manga }) {
         <>
             <QueryStatus query={coverQuery} name="cover" />
             {coverQuery.data && (
-                <Image source={{ uri: coverQuery.data }} style={{ width: 200, height: 200 }} />
+                <View style={styles.container}>
+                    <Image
+                        source={{ uri: coverQuery.data }}
+                        resizeMode="cover"
+                        style={styles.image}
+                    />
+                </View>
             )}
         </>
     );
@@ -52,66 +81,111 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
     }
 
     return (
-        <Text variant="header">
-            title: {title + "\n"}
-            id: {metadata.id + "\n"}
-            demographic: {mangaAttributes.publicationDemographic + "\n"}
-            year: {mangaAttributes.year + "\n"}
-            status: {mangaAttributes.status + "\n"}
-            description: {mangaAttributes.description.en + "\n"}
-            Tags: {"\n"}
-            {mangaAttributes.tags.map(attribute => (
-                <Text key={attribute.id}>{attribute.attributes.name.en + "\n"}</Text>
-            ))}
-        </Text>
+        <Box paddingHorizontal={"lg"} gap={"sm"} height={240}>
+            <Box flexDirection={"row"} gap={"sm"}>
+                {mangaAttributes.tags.slice(0, 3).map(attribute => (
+                    <Text fontSize={12} key={attribute.id} style={styles.textWithShadow}>
+                        {attribute.attributes.name.en}
+                    </Text>
+                ))}
+            </Box>
+            <Text color={"textPrimary"} fontSize={18} style={styles.textWithShadow}>
+                {title}
+            </Text>
+            <Text color={"textPrimary"} style={styles.textWithShadow}>
+                {mangaAttributes.publicationDemographic}
+            </Text>
+        </Box>
     );
 }
 
-function DisplayChapters({ mangaId }: { mangaId: string }) {
+function DisplayChapters({ mangaId, metadata }: { mangaId: string; metadata: Manga }) {
     const limit = 40;
     const chapterQuery = useFetchMangaFeed(mangaId, limit);
     const chapters = chapterQuery.data?.pages.flat() ?? [];
 
     return (
         <>
-            <QueryStatus query={chapterQuery} name="chapters" />
             <FlatList
                 data={chapters}
                 keyExtractor={item => item.id}
-                renderItem={({ item }) => <DisplayChaptersLink item={item} mangaId={mangaId} />}
+                overScrollMode="never"
+                renderItem={({ item, index }) => (
+                    <DisplayChaptersLink item={item} index={index} mangaId={mangaId} />
+                )}
                 onEndReached={() => {
                     if (chapterQuery.hasNextPage && !chapterQuery.isFetchingNextPage) {
                         chapterQuery.fetchNextPage();
                     }
                 }}
                 onEndReachedThreshold={0.5}
+                ListHeaderComponent={() => <DisplayMetadata metadata={metadata} />}
                 ListFooterComponent={
                     chapterQuery.isFetchingNextPage ? <ActivityIndicator size="large" /> : null
                 }
-                ListEmptyComponent={<Text>No chapters available.</Text>}
+                ListEmptyComponent={() => (
+                    <Box backgroundColor={"background"}>
+                        <Text color={"textPrimary"}>No chapters available.</Text>
+                    </Box>
+                )}
+                ItemSeparatorComponent={() => <Box height={1} backgroundColor={"border"}></Box>}
+                style={{ marginTop: 12 }}
             />
+            <QueryStatus query={chapterQuery} name="chapters" />
         </>
     );
 }
 
-function DisplayChaptersLink({ item, mangaId }: { item: FeedData; mangaId: string }) {
+function DisplayChaptersLink({
+    item,
+    index,
+    mangaId,
+}: {
+    item: FeedData;
+    index: number;
+    mangaId: string;
+}) {
     return (
-        <Link
+        <Pressable
             key={item.id}
-            style={{
-                marginVertical: 10,
-                marginLeft: 80,
-                color: "red",
-                textAlign: "center",
-            }}
-            href={{
-                params: {
-                    mangaId,
-                    chapterId: item.id,
-                },
-                pathname: "/manga/[mangaId]/chapter/[chapterId]",
-            }}>
-            {item.attributes.chapter}
-        </Link>
+            onPress={() =>
+                router.push({
+                    pathname: "/manga/[mangaId]/chapter/[chapterId]",
+                    params: {
+                        mangaId,
+                        chapterId: item.id,
+                    },
+                })
+            }>
+            <Box
+                height={60}
+                alignItems={"center"}
+                justifyContent={"space-between"}
+                width={"100%"}
+                backgroundColor={"background"}
+                flexDirection={"row"}
+                paddingHorizontal={"md"}>
+                <Text fontSize={13}>Ch. {item.attributes.chapter}</Text>
+                <Text fontSize={13}>#{index}</Text>
+            </Box>
+        </Pressable>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        height: 312,
+        width: "100%",
+        overflow: "hidden",
+        position: "absolute",
+    },
+    image: {
+        height: "180%",
+        opacity: 0.8,
+    },
+    textWithShadow: {
+        textShadowColor: "rgba(0, 0, 0, 0.75)",
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 10,
+    },
+});

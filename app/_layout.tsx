@@ -41,10 +41,16 @@ export default function RootLayout() {
                         }}
                     />
                     <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
-                    {/* <Stack.Screen
-            name="manga/[mangaId]/index"
-            options={}
-          /> */}
+                    <Stack.Screen
+                        name="manga/[mangaId]/index"
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="manga/[mangaId]/about/index"
+                        options={{ headerShown: false }}
+                    />
                 </Stack>
             </ThemeProvider>
         </PersistQueryClientProvider>
