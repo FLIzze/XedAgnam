@@ -1,4 +1,8 @@
-import { useFetchPage as useFetchPage, useFetchPageResponse } from "@/queries/fetch";
+import {
+    useFetchPage as useFetchPage,
+    useFetchPageResponse,
+    useFetchWholeFeed,
+} from "@/queries/fetch";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { Dimensions, FlatList, Image } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
@@ -13,9 +17,34 @@ import Skeleton from "@/components/common/Skeleton";
 export default function ChapterPage() {
     const [headerShown, setHeaderShown] = useState(false);
 
-    const { chapterId } = useLocalSearchParams<{ chapterId: string }>();
-    const { chapterNumber } = useLocalSearchParams<{ chapterNumber: string }>();
+    const { chapterId, mangaId } = useLocalSearchParams<{ chapterId: string; mangaId: string }>();
+
     const pageResponseQuery = useFetchPageResponse(chapterId);
+    const feedQuery = useFetchWholeFeed(mangaId);
+
+    let chapterIndex: number = -1;
+
+    if (!feedQuery.data) {
+        return;
+    }
+
+    // for some reason findIndex was not working if index is 0?
+    for (let i = 0; i < feedQuery.data.length; i++) {
+        if (feedQuery.data[i].id === chapterId) {
+            chapterIndex = i;
+            break;
+        }
+    }
+
+    let previousChapterId: string | null = null;
+    let nextChapterId: string | null = null;
+
+    if (chapterIndex > 0) {
+        previousChapterId = feedQuery.data[chapterIndex - 1]?.id ?? null;
+    }
+    if (chapterIndex < (feedQuery.data?.length ?? 0) - 1) {
+        nextChapterId = feedQuery.data[chapterIndex + 1]?.id ?? null;
+    }
 
     const chapter = pageResponseQuery.data?.chapter;
     const pages = chapter?.dataSaver ?? [];
@@ -37,10 +66,10 @@ export default function ChapterPage() {
                     paddingHorizontal={"sm"}
                     zIndex={99}
                     marginBottom={"sm"}>
-                    <Pressable onPress={router.back}>
+                    <Pressable onPress={() => router.push(`/manga/${mangaId}`)}>
                         <Ionicons name="chevron-back" size={28} color="white" />
                     </Pressable>
-                    <Text fontSize={18}>Ch. {chapterNumber}</Text>
+                    <Text fontSize={18}>Ch. {chapterIndex}</Text>
                 </Box>
             )}
             <Pressable onPress={toggleHeader} style={{ flex: 1 }}>
@@ -49,7 +78,7 @@ export default function ChapterPage() {
                         data={pages}
                         renderItem={({ item }) => <PageImage pageUrl={item} hash={hash} />}
                         initialNumToRender={3}
-                        windowSize={99}
+                        windowSize={pages.length}
                         maxToRenderPerBatch={3}
                     />
                 )}
@@ -64,12 +93,22 @@ export default function ChapterPage() {
                     zIndex={99}
                     marginTop={"sm"}
                     gap={"lg"}>
-                    <Pressable onPress={() => {}}>
-                        <Ionicons name="chevron-back" size={28} color="white" />
-                    </Pressable>
-                    <Pressable onPress={() => {}}>
-                        <Ionicons name="chevron-forward" size={28} color="white" />
-                    </Pressable>
+                    {previousChapterId && (
+                        <Pressable
+                            onPress={() =>
+                                router.push(`/manga/${mangaId}/chapter/${previousChapterId}`)
+                            }>
+                            <Ionicons name="chevron-back" size={28} color="white" />
+                        </Pressable>
+                    )}
+                    {nextChapterId && (
+                        <Pressable
+                            onPress={() =>
+                                router.push(`/manga/${mangaId}/chapter/${nextChapterId}`)
+                            }>
+                            <Ionicons name="chevron-forward" size={28} color="white" />
+                        </Pressable>
+                    )}
                 </Box>
             )}
         </GestureHandlerRootView>
@@ -81,7 +120,6 @@ function PageImage({ pageUrl: dataSaver, hash }: { pageUrl: string; hash: string
     const windowWidth = Dimensions.get("window").width;
     const [imageSize, setImageSize] = useState({ width: windowWidth, height: 400 });
 
-    // Used to get the page image size
     useEffect(() => {
         if (pageQuery.data) {
             Image.getSize(pageQuery.data, (w, h) =>

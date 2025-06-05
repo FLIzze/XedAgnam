@@ -1,11 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router, useRootNavigationState } from "expo-router";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 
 export function useHasOnBoarded() {
     const [hasOnBoarded, setHasOnBoarded] = useState<boolean | null>(null);
     const [checkedStorage, setCheckedStorage] = useState(false);
-    // const rootNavigationState = useRootNavigationState();
 
     useEffect(() => {
         if (!checkedStorage) {

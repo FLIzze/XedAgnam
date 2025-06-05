@@ -202,3 +202,32 @@ async function fetchAuthor(authorId: string): Promise<Author> {
         throw error;
     }
 }
+
+async function fetchWholeFeed(mangaId: string): Promise<FeedData[]> {
+    try {
+        const url = new URL(
+            `${apiUrl}/manga/${mangaId}/feed?order[volume]=asc&order[chapter]=asc&includeExternalUrl=0`
+        );
+        url.searchParams.append("translatedLanguage[]", lang);
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Error fetching manga feed.");
+        }
+
+        const data = await response.json();
+
+        return data.data;
+    } catch (error) {
+        console.error(`fetchWholeFeed error:`, error);
+        throw error;
+    }
+}
+
+export function useFetchWholeFeed(mangaId: string) {
+    return useQuery({
+        queryKey: ["wholeFeed", mangaId],
+        queryFn: () => fetchWholeFeed(mangaId),
+    });
+}
