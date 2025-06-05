@@ -57,7 +57,7 @@ function DisplayManga({ manga, index }: { manga: Manga; index: number }) {
                 {index + 1}
             </Text>
             <Text color={"textPrimary"} fontSize={11} numberOfLines={2}>
-                {manga.attributes.title.en}
+                {manga.attributes.title.en ?? manga.attributes.altTitles.find(el => el.en)?.en}
             </Text>
         </Box>
     );

@@ -26,6 +26,7 @@ interface Lang {
 
 interface Attributes {
     title: Lang;
+    altTitles: Lang[];
     description: Lang;
     lastVolume: string;
     lastChapter: string;

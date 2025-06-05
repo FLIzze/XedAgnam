@@ -10,8 +10,7 @@ import {
 } from "@/queries/fetch";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { Image, ActivityIndicator, FlatList, StyleSheet, View, Button } from "react-native";
+import { Image, ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
 
 export default function MangaPage() {
@@ -132,26 +131,15 @@ function DisplayChapters({ mangaId, metadata }: { mangaId: string; metadata: Man
     const chapterQuery = useFetchMangaFeed(mangaId, limit);
     const chapters = chapterQuery.data?.pages.flat() ?? [];
 
-    const [invertedChapterList, setInvertedChapterList] = useState<boolean>(false);
-
     return (
         <>
-            <Button
-                title="filter"
-                onPress={() => {
-                    setInvertedChapterList(!invertedChapterList);
-                }}
-            />
             <FlatList
-                data={invertedChapterList ? [...chapters].reverse() : chapters}
+                data={chapters}
                 keyExtractor={item => item.id}
                 overScrollMode="never"
-                renderItem={({ item, index }) => {
-                    const displayIndex = invertedChapterList ? chapters.length - 1 - index : index;
-                    return (
-                        <DisplayChaptersLink item={item} index={displayIndex} mangaId={mangaId} />
-                    );
-                }}
+                renderItem={({ item, index }) => (
+                    <DisplayChaptersLink item={item} index={index} mangaId={mangaId} />
+                )}
                 onEndReached={() => {
                     if (chapterQuery.hasNextPage && !chapterQuery.isFetchingNextPage) {
                         chapterQuery.fetchNextPage();
