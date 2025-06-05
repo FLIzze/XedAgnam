@@ -8,7 +8,8 @@ import {
     useFetchMangaMetadataById,
 } from "@/queries/fetch";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Link, router, useLocalSearchParams } from "expo-router";
+import { isLoading } from "expo-font";
+import { router, useLocalSearchParams } from "expo-router";
 import { Image, ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
 

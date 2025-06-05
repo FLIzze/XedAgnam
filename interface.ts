@@ -20,13 +20,13 @@ interface CoverAttributes {
     fileName: string;
 }
 
-interface Description {
+interface Lang {
     en: string;
 }
 
 interface Attributes {
-    title: string;
-    description: Description;
+    title: Lang;
+    description: Lang;
     lastVolume: string;
     lastChapter: string;
     publicationDemographic: string;
