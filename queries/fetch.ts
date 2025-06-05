@@ -35,7 +35,6 @@ async function fetchMangaMetadataById(id: string): Promise<Manga> {
         }
 
         const data = await response.json();
-        console.log(data.data);
         return data.data;
     } catch (error) {
         console.error(`fetchMangaMetadataById error:`, error);

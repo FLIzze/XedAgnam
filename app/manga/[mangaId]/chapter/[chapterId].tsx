@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryStatus } from "@/components/QueryStatus";
 
 export default function ChapterPage() {
-    const { chapterId } = useLocalSearchParams<{ chapterId: string }>();
+    const { chapterId } = useLocalSearchParams<{ mangaId: string; chapterId: string }>();
     const pageResponseQuery = useFetchPageResponse(chapterId);
 
     const chapter = pageResponseQuery.data?.chapter;
