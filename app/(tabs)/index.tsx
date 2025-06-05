@@ -1,14 +1,10 @@
-import Text from "@/components/common/Text";
-import { Link } from "expo-router";
 import { useHasOnBoarded } from "@/hooks/useHasOnBoarded";
 import Box from "@/components/common/Box";
 import MangaHorizontalList from "@/components/home/MangaHorizontalList";
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 
 export default function HomePage() {
-    const { hasOnBoarded, checkedStorage } = useHasOnBoarded();
-
-    // if (!checkedStorage || hasOnBoarded === null) return null;
+    useHasOnBoarded();
 
     return (
         <GestureHandlerRootView>
@@ -17,10 +13,6 @@ export default function HomePage() {
                     <MangaHorizontalList listTitle="Most Followed" type="followedCount" />
                     <MangaHorizontalList listTitle="Latest Updates" type="latestUploadedChapter" />
                     <MangaHorizontalList listTitle="Recommanded for you" type="relevance" />
-
-                    <Link href={"/onboarding"}>
-                        <Text color={"accent"}>Onboarding</Text>
-                    </Link>
                 </Box>
             </ScrollView>
         </GestureHandlerRootView>
