@@ -6,7 +6,6 @@ import {
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { Dimensions, FlatList, Image } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
-import { QueryStatus } from "@/components/QueryStatus";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -31,7 +30,7 @@ export default function ChapterPage() {
     // for some reason findIndex was not working if index is 0?
     for (let i = 0; i < feedQuery.data.length; i++) {
         if (feedQuery.data[i].id === chapterId) {
-            chapterIndex = i;
+            chapterIndex = i + 1;
             break;
         }
     }
