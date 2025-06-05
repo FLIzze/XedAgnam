@@ -30,7 +30,7 @@ export default function ChapterPage() {
     // for some reason findIndex was not working if index is 0?
     for (let i = 0; i < feedQuery.data.length; i++) {
         if (feedQuery.data[i].id === chapterId) {
-            chapterIndex = i + 1;
+            chapterIndex = i;
             break;
         }
     }
@@ -68,7 +68,7 @@ export default function ChapterPage() {
                     <Pressable onPress={() => router.push(`/manga/${mangaId}`)}>
                         <Ionicons name="chevron-back" size={28} color="white" />
                     </Pressable>
-                    <Text fontSize={18}>Ch. {chapterIndex}</Text>
+                    <Text fontSize={18}>Ch. {chapterIndex + 1}</Text>
                 </Box>
             )}
             <Pressable onPress={toggleHeader} style={{ flex: 1 }}>
