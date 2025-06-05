@@ -9,7 +9,7 @@ import {
     useFetchMangaMetadataById,
 } from "@/queries/fetch";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Link, router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Image, ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
 
@@ -29,7 +29,7 @@ export default function MangaPage() {
                         justifyContent={"space-between"}
                         paddingHorizontal={"sm"}
                         zIndex={99}>
-                        <Pressable onPress={router.back}>
+                        <Pressable onPress={() => router.push(`/`)}>
                             <Ionicons name="chevron-back" size={28} color="white" />
                         </Pressable>
                         <Pressable
@@ -181,7 +181,6 @@ function DisplayChaptersLink({
                     params: {
                         mangaId,
                         chapterId: item.id,
-                        chapterNumber: item.attributes.chapter,
                     },
                 })
             }>

@@ -21,14 +21,29 @@ export default function ChapterPage() {
     const pageResponseQuery = useFetchPageResponse(chapterId);
     const feedQuery = useFetchWholeFeed(mangaId);
 
-    const chapterIndex = feedQuery.data?.findIndex(el => el.id === chapterId);
+    let chapterIndex: number = -1;
 
-    if (!chapterIndex) {
+    if (!feedQuery.data) {
         return;
     }
 
-    const previousChapter = feedQuery.data?.[chapterIndex - 1];
-    const nextChapter = feedQuery.data?.[chapterIndex + 1];
+    // for some reason findIndex was not working if index is 0?
+    for (let i = 0; i < feedQuery.data.length; i++) {
+        if (feedQuery.data[i].id === chapterId) {
+            chapterIndex = i;
+            break;
+        }
+    }
+
+    let previousChapterId: string | null = null;
+    let nextChapterId: string | null = null;
+
+    if (chapterIndex > 0) {
+        previousChapterId = feedQuery.data[chapterIndex - 1]?.id ?? null;
+    }
+    if (chapterIndex < (feedQuery.data?.length ?? 0) - 1) {
+        nextChapterId = feedQuery.data[chapterIndex + 1]?.id ?? null;
+    }
 
     const chapter = pageResponseQuery.data?.chapter;
     const pages = chapter?.dataSaver ?? [];
@@ -50,7 +65,7 @@ export default function ChapterPage() {
                     paddingHorizontal={"sm"}
                     zIndex={99}
                     marginBottom={"sm"}>
-                    <Pressable onPress={router.back}>
+                    <Pressable onPress={() => router.push(`/manga/${mangaId}`)}>
                         <Ionicons name="chevron-back" size={28} color="white" />
                     </Pressable>
                     <Text fontSize={18}>Ch. {chapterIndex}</Text>
@@ -78,20 +93,19 @@ export default function ChapterPage() {
                     zIndex={99}
                     marginTop={"sm"}
                     gap={"lg"}>
-                    {chapterIndex !== 1 && previousChapter && (
+                    {previousChapterId && (
                         <Pressable
-                            onPress={() => {
-                                router.push(`/manga/${mangaId}/chapter/${previousChapter.id}`);
-                            }}>
+                            onPress={() =>
+                                router.push(`/manga/${mangaId}/chapter/${previousChapterId}`)
+                            }>
                             <Ionicons name="chevron-back" size={28} color="white" />
                         </Pressable>
                     )}
-
-                    {chapterIndex !== feedQuery.data?.length && nextChapter && (
+                    {nextChapterId && (
                         <Pressable
-                            onPress={() => {
-                                router.push(`/manga/${mangaId}/chapter/${nextChapter.id}`);
-                            }}>
+                            onPress={() =>
+                                router.push(`/manga/${mangaId}/chapter/${nextChapterId}`)
+                            }>
                             <Ionicons name="chevron-forward" size={28} color="white" />
                         </Pressable>
                     )}
