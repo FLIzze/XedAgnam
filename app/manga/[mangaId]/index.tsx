@@ -9,7 +9,7 @@ import {
     useFetchMangaMetadataById,
 } from "@/queries/fetch";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { router, useLocalSearchParams } from "expo-router";
+import { Link, router, useLocalSearchParams } from "expo-router";
 import { Image, ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
 
@@ -101,7 +101,11 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
                     </Text>
                 ))}
             </Box>
-            <Text color={"textPrimary"} fontSize={18} style={styles.textWithShadow}>
+            <Text
+                color={"textPrimary"}
+                fontSize={18}
+                style={styles.textWithShadow}
+                numberOfLines={2}>
                 {title}
             </Text>
             <Text color={"textPrimary"} style={styles.textWithShadow}>
@@ -177,6 +181,7 @@ function DisplayChaptersLink({
                     params: {
                         mangaId,
                         chapterId: item.id,
+                        chapterNumber: item.attributes.chapter,
                     },
                 })
             }>
@@ -189,7 +194,7 @@ function DisplayChaptersLink({
                 flexDirection={"row"}
                 paddingHorizontal={"md"}>
                 <Text fontSize={13}>Ch. {item.attributes.chapter}</Text>
-                <Text fontSize={13}>#{index}</Text>
+                <Text fontSize={13}>#{index + 1}</Text>
             </Box>
         </Pressable>
     );

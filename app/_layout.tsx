@@ -51,6 +51,10 @@ export default function RootLayout() {
                         name="manga/[mangaId]/about/index"
                         options={{ headerShown: false }}
                     />
+                    <Stack.Screen
+                        name="manga/[mangaId]/chapter/[chapterId]"
+                        options={{ headerShown: false }}
+                    />
                 </Stack>
             </ThemeProvider>
         </PersistQueryClientProvider>
