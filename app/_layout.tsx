@@ -38,6 +38,7 @@ export default function RootLayout() {
                             headerShown: true,
                             title: "Home",
                             headerTitle: props => <LogoTitle />,
+                            headerBackVisible: false,
                         }}
                     />
                     <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
