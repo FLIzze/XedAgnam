@@ -91,3 +91,30 @@ export interface Translation {
     lang: string;
     id: string;
 }
+
+export interface Author {
+    id: string;
+    attributes: AuthorAttributes;
+}
+
+interface AuthorAttributes {
+    name: string;
+    imaUrl: string;
+    twitter: string;
+    pixiv: string;
+    melonBook: string;
+    fanBox: string;
+    booth: string;
+    nicoVideo: string;
+    skeb: string;
+    fantia: string;
+    tumblr: string;
+    youtube: string;
+    weibo: string;
+    naver: string;
+    namicomi: string;
+    website: string;
+    version: string;
+    createdAt: string;
+    updatedAt: string;
+}

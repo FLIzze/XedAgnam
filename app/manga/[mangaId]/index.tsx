@@ -3,14 +3,15 @@ import Text from "@/components/common/Text";
 import { QueryStatus } from "@/components/QueryStatus";
 import { FeedData, Manga } from "@/interface";
 import {
+    useFetchAuthor,
     useFetchCoverByManga,
     useFetchMangaFeed,
     useFetchMangaMetadataById,
 } from "@/queries/fetch";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { isLoading } from "expo-font";
 import { router, useLocalSearchParams } from "expo-router";
-import { Image, ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { Image, ActivityIndicator, FlatList, StyleSheet, View, Button } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
 
 export default function MangaPage() {
@@ -19,33 +20,34 @@ export default function MangaPage() {
 
     return (
         <GestureHandlerRootView>
-            <Box
-                height={64}
-                flexDirection={"row"}
-                alignItems={"flex-end"}
-                justifyContent={"space-between"}
-                paddingHorizontal={"sm"}
-                zIndex={99}>
-                <Pressable onPress={router.back}>
-                    <Ionicons name="chevron-back" size={28} color="white" />
-                </Pressable>
-                <Pressable
-                    onPress={() =>
-                        router.push({
-                            pathname: `/manga/[mangaId]/about`,
-                            params: {
-                                mangaId: mangaId,
-                                status: metadataQuery.data?.attributes.status,
-                                description: metadataQuery.data?.attributes.description.en,
-                            },
-                        })
-                    }>
-                    <Ionicons name="information-circle" size={28} color="white" />
-                </Pressable>
-            </Box>
             <QueryStatus query={metadataQuery} name="metadata" />
             {metadataQuery.data && (
                 <>
+                    <Box
+                        height={64}
+                        flexDirection={"row"}
+                        alignItems={"flex-end"}
+                        justifyContent={"space-between"}
+                        paddingHorizontal={"sm"}
+                        zIndex={99}>
+                        <Pressable onPress={router.back}>
+                            <Ionicons name="chevron-back" size={28} color="white" />
+                        </Pressable>
+                        <Pressable
+                            onPress={() =>
+                                router.push({
+                                    pathname: `/manga/[mangaId]/about`,
+                                    params: {
+                                        mangaId: mangaId,
+                                        status: metadataQuery.data.attributes.status,
+                                        description: metadataQuery.data.attributes.description.en,
+                                    },
+                                })
+                            }>
+                            <Ionicons name="information-circle" size={28} color="white" />
+                        </Pressable>
+                    </Box>
+
                     <DisplayCover manga={metadataQuery.data} />
                     <DisplayChapters metadata={metadataQuery.data} mangaId={mangaId} />
                 </>
@@ -73,13 +75,23 @@ function DisplayCover({ manga }: { manga: Manga }) {
     );
 }
 
+function DisplayAuthor({ authorId }: { authorId: string }) {
+    const author = useFetchAuthor(authorId);
+
+    return (
+        <>
+            <QueryStatus query={author} name="author" />
+            {author.data && <Text>{author.data.attributes.name}</Text>}
+        </>
+    );
+}
+
 function DisplayMetadata({ metadata }: { metadata: Manga }) {
     const mangaAttributes = metadata.attributes;
-    const titleObj = metadata.attributes.title;
-    let title: string = "";
-    if (titleObj) {
-        title = String(Object.entries(titleObj)[0][1]);
-    }
+
+    const title = metadata.attributes.title.en;
+    const author = metadata.relationships.find(el => el.type === "author");
+    const artist = metadata.relationships.find(el => el.type === "artist");
 
     return (
         <Box paddingHorizontal={"lg"} gap={"sm"} height={240}>
@@ -94,7 +106,22 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
                 {title}
             </Text>
             <Text color={"textPrimary"} style={styles.textWithShadow}>
-                {mangaAttributes.publicationDemographic}
+                {mangaAttributes.publicationDemographic + "\n"}
+                {author && artist && (
+                    <>
+                        {author.id !== artist.id ? (
+                            <>
+                                Author: <DisplayAuthor authorId={author.id} />
+                                Artist: <DisplayAuthor authorId={artist.id} />
+                            </>
+                        ) : (
+                            <>
+                                Author and Artist:
+                                <DisplayAuthor authorId={artist.id} />
+                            </>
+                        )}
+                    </>
+                )}
             </Text>
         </Box>
     );
@@ -105,15 +132,26 @@ function DisplayChapters({ mangaId, metadata }: { mangaId: string; metadata: Man
     const chapterQuery = useFetchMangaFeed(mangaId, limit);
     const chapters = chapterQuery.data?.pages.flat() ?? [];
 
+    const [invertedChapterList, setInvertedChapterList] = useState<boolean>(false);
+
     return (
         <>
+            <Button
+                title="filter"
+                onPress={() => {
+                    setInvertedChapterList(!invertedChapterList);
+                }}
+            />
             <FlatList
-                data={chapters}
+                data={invertedChapterList ? [...chapters].reverse() : chapters}
                 keyExtractor={item => item.id}
                 overScrollMode="never"
-                renderItem={({ item, index }) => (
-                    <DisplayChaptersLink item={item} index={index} mangaId={mangaId} />
-                )}
+                renderItem={({ item, index }) => {
+                    const displayIndex = invertedChapterList ? chapters.length - 1 - index : index;
+                    return (
+                        <DisplayChaptersLink item={item} index={displayIndex} mangaId={mangaId} />
+                    );
+                }}
                 onEndReached={() => {
                     if (chapterQuery.hasNextPage && !chapterQuery.isFetchingNextPage) {
                         chapterQuery.fetchNextPage();
@@ -124,11 +162,7 @@ function DisplayChapters({ mangaId, metadata }: { mangaId: string; metadata: Man
                 ListFooterComponent={
                     chapterQuery.isFetchingNextPage ? <ActivityIndicator size="large" /> : null
                 }
-                ListEmptyComponent={() => (
-                    <Box backgroundColor={"background"}>
-                        <Text color={"textPrimary"}>No chapters available.</Text>
-                    </Box>
-                )}
+                ListEmptyComponent={() => <EmptyComponent isLoading={chapterQuery.isLoading} />}
                 ItemSeparatorComponent={() => <Box height={1} backgroundColor={"border"}></Box>}
                 style={{ marginTop: 12 }}
             />
@@ -171,6 +205,16 @@ function DisplayChaptersLink({
             </Box>
         </Pressable>
     );
+}
+
+function EmptyComponent({ isLoading }: { isLoading: boolean }) {
+    if (!isLoading) {
+        return (
+            <Box backgroundColor={"background"}>
+                <Text color={"textPrimary"}>No chapters available.</Text>
+            </Box>
+        );
+    }
 }
 
 const styles = StyleSheet.create({

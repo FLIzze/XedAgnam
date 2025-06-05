@@ -1,4 +1,4 @@
-import { FeedData, Manga, PageResponse } from "@/interface";
+import { Author, FeedData, Manga, PageResponse } from "@/interface";
 import { Filter } from "@/types";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
@@ -35,6 +35,7 @@ async function fetchMangaMetadataById(id: string): Promise<Manga> {
         }
 
         const data = await response.json();
+        console.log(data.data);
         return data.data;
     } catch (error) {
         console.error(`fetchMangaMetadataById error:`, error);
@@ -176,4 +177,29 @@ export function useFetchPage(pageUrl: string, hash: string) {
         queryKey: ["chapterPage", pageUrl],
         queryFn: () => fetchPageByChapter(pageUrl, hash),
     });
+}
+
+export function useFetchAuthor(authorId: string) {
+    return useQuery({
+        queryKey: ["authorId", authorId],
+        queryFn: () => fetchAuthor(authorId),
+    });
+}
+
+async function fetchAuthor(authorId: string): Promise<Author> {
+    try {
+        const response = await fetch(`${apiUrl}/author/${authorId}`);
+
+        if (!response.ok) {
+            throw new Error(`Error fetching author`);
+        }
+
+        const data = await response.json();
+        const author: Author = data.data;
+
+        return author;
+    } catch (error) {
+        console.error(`fetchByType error:`, error);
+        throw error;
+    }
 }
