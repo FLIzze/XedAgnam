@@ -32,6 +32,9 @@ export default function MangaHorizontalList({
                     ItemSeparatorComponent={() => <Box paddingLeft={"sm"} />}
                     bounces={false}
                     overScrollMode="never"
+                    maxToRenderPerBatch={4}
+                    windowSize={4}
+                    initialNumToRender={4}
                     data={mangaQuery.data}
                     renderItem={({ item, index }) => <DisplayManga manga={item} index={index} />}
                 />

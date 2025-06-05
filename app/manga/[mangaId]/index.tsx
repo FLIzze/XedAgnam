@@ -89,7 +89,11 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
                     </Text>
                 ))}
             </Box>
-            <Text color={"textPrimary"} fontSize={18} style={styles.textWithShadow}>
+            <Text
+                color={"textPrimary"}
+                fontSize={18}
+                style={styles.textWithShadow}
+                numberOfLines={2}>
                 {title}
             </Text>
             <Text color={"textPrimary"} style={styles.textWithShadow}>
@@ -128,7 +132,7 @@ function DisplayChapters({ mangaId, metadata }: { mangaId: string; metadata: Man
                         <Text color={"textPrimary"}>No chapters available.</Text>
                     </Box>
                 )}
-                ItemSeparatorComponent={() => <Box height={1} backgroundColor={"border"}></Box>}
+                // ItemSeparatorComponent={() => <Box height={1} backgroundColor={"border"}></Box>}
                 style={{ marginTop: 12 }}
             />
             <QueryStatus query={chapterQuery} name="chapters" />
@@ -154,6 +158,7 @@ function DisplayChaptersLink({
                     params: {
                         mangaId,
                         chapterId: item.id,
+                        chapterNumber: item.attributes.chapter,
                     },
                 })
             }>
@@ -166,7 +171,7 @@ function DisplayChaptersLink({
                 flexDirection={"row"}
                 paddingHorizontal={"md"}>
                 <Text fontSize={13}>Ch. {item.attributes.chapter}</Text>
-                <Text fontSize={13}>#{index}</Text>
+                <Text fontSize={13}>#{index + 1}</Text>
             </Box>
         </Pressable>
     );
