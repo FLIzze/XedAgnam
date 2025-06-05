@@ -18,7 +18,7 @@ export default function Skeleton({ width, height }: Props) {
 
     useEffect(() => {
         opacity.value = withRepeat(
-            withSequence(withTiming(0.6, { duration: 500 }), withTiming(1, { duration: 500 })),
+            withSequence(withTiming(0.6, { duration: 300 }), withTiming(1, { duration: 300 })),
             -1
         );
     }, []);
@@ -30,7 +30,12 @@ export default function Skeleton({ width, height }: Props) {
     return (
         <Animated.View
             style={[
-                { width: width, height: height, borderRadius: 8, backgroundColor: "#3B4454" },
+                {
+                    width: width,
+                    height: height,
+                    borderRadius: 8,
+                    backgroundColor: "#3B4454",
+                },
                 animatedStyle,
             ]}></Animated.View>
     );

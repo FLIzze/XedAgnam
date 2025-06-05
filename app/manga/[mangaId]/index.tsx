@@ -1,6 +1,6 @@
 import Box from "@/components/common/Box";
+import Skeleton from "@/components/common/Skeleton";
 import Text from "@/components/common/Text";
-import { QueryStatus } from "@/components/QueryStatus";
 import { FeedData, Manga } from "@/interface";
 import {
     useFetchAuthor,
@@ -9,7 +9,7 @@ import {
     useFetchMangaMetadataById,
 } from "@/queries/fetch";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Link, router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Image, ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
 
@@ -19,7 +19,6 @@ export default function MangaPage() {
 
     return (
         <GestureHandlerRootView>
-            <QueryStatus query={metadataQuery} name="metadata" />
             {metadataQuery.data && (
                 <>
                     <Box
@@ -29,7 +28,7 @@ export default function MangaPage() {
                         justifyContent={"space-between"}
                         paddingHorizontal={"sm"}
                         zIndex={99}>
-                        <Pressable onPress={router.back}>
+                        <Pressable onPress={router.back} hitSlop={32}>
                             <Ionicons name="chevron-back" size={28} color="white" />
                         </Pressable>
                         <Pressable
@@ -60,16 +59,17 @@ function DisplayCover({ manga }: { manga: Manga }) {
 
     return (
         <>
-            <QueryStatus query={coverQuery} name="cover" />
-            {coverQuery.data && (
-                <View style={styles.container}>
+            <View style={styles.container}>
+                {coverQuery.isLoading && <Skeleton width={"100%"} height={"100%"} />}
+                {coverQuery.data && (
                     <Image
                         source={{ uri: coverQuery.data }}
                         resizeMode="cover"
                         style={styles.image}
                     />
-                </View>
-            )}
+                )}
+            </View>
+            <View style={styles.gradientContainer} />
         </>
     );
 }
@@ -79,8 +79,12 @@ function DisplayAuthor({ authorId }: { authorId: string }) {
 
     return (
         <>
-            <QueryStatus query={author} name="author" />
-            {author.data && <Text>{author.data.attributes.name}</Text>}
+            {author.isLoading && <Skeleton width={"40%"} height={20} />}
+            {author.data && (
+                <Text fontSize={14} style={styles.textWithShadow}>
+                    {author.data.attributes.name}
+                </Text>
+            )}
         </>
     );
 }
@@ -88,7 +92,7 @@ function DisplayAuthor({ authorId }: { authorId: string }) {
 function DisplayMetadata({ metadata }: { metadata: Manga }) {
     const mangaAttributes = metadata.attributes;
 
-    const title = metadata.attributes.title.en;
+    const title = mangaAttributes.title.en ?? mangaAttributes.altTitles.find(el => el.en)?.en;
     const author = metadata.relationships.find(el => el.type === "author");
     const artist = metadata.relationships.find(el => el.type === "artist");
 
@@ -108,23 +112,23 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
                 numberOfLines={2}>
                 {title}
             </Text>
-            <Text color={"textPrimary"} style={styles.textWithShadow}>
-                {mangaAttributes.publicationDemographic + "\n"}
-                {author && artist && (
-                    <>
-                        {author.id !== artist.id ? (
-                            <>
-                                Author: <DisplayAuthor authorId={author.id} />
-                                Artist: <DisplayAuthor authorId={artist.id} />
-                            </>
-                        ) : (
-                            <>
-                                Author and Artist:
-                                <DisplayAuthor authorId={artist.id} />
-                            </>
-                        )}
-                    </>
-                )}
+            {author && artist && (
+                <>
+                    {author.id !== artist.id ? (
+                        <Box flexDirection={"row"} columnGap={"xs"} flexWrap={"wrap"}>
+                            <DisplayAuthor authorId={author.id} />
+                            <Text fontSize={14} style={styles.textWithShadow}>
+                                /
+                            </Text>
+                            <DisplayAuthor authorId={artist.id} />
+                        </Box>
+                    ) : (
+                        <DisplayAuthor authorId={artist.id} />
+                    )}
+                </>
+            )}
+            <Text color={"textPrimary"} fontSize={13} style={styles.textWithShadow}>
+                {mangaAttributes.publicationDemographic}
             </Text>
         </Box>
     );
@@ -137,28 +141,30 @@ function DisplayChapters({ mangaId, metadata }: { mangaId: string; metadata: Man
 
     return (
         <>
-            <FlatList
-                data={chapters}
-                keyExtractor={item => item.id}
-                overScrollMode="never"
-                renderItem={({ item, index }) => (
-                    <DisplayChaptersLink item={item} index={index} mangaId={mangaId} />
-                )}
-                onEndReached={() => {
-                    if (chapterQuery.hasNextPage && !chapterQuery.isFetchingNextPage) {
-                        chapterQuery.fetchNextPage();
+            {/* {!chapterQuery.data && chapterQuery.isLoading && <Skeleton width={120} height={200} />} */}
+            {chapterQuery.data && (
+                <FlatList
+                    data={chapters}
+                    keyExtractor={item => item.id}
+                    overScrollMode="never"
+                    renderItem={({ item, index }) => (
+                        <DisplayChaptersLink item={item} index={index} mangaId={mangaId} />
+                    )}
+                    onEndReached={() => {
+                        if (chapterQuery.hasNextPage && !chapterQuery.isFetchingNextPage) {
+                            chapterQuery.fetchNextPage();
+                        }
+                    }}
+                    onEndReachedThreshold={0.5}
+                    ListHeaderComponent={() => <DisplayMetadata metadata={metadata} />}
+                    ListFooterComponent={
+                        chapterQuery.isFetchingNextPage ? <ActivityIndicator size="large" /> : null
                     }
-                }}
-                onEndReachedThreshold={0.5}
-                ListHeaderComponent={() => <DisplayMetadata metadata={metadata} />}
-                ListFooterComponent={
-                    chapterQuery.isFetchingNextPage ? <ActivityIndicator size="large" /> : null
-                }
-                ListEmptyComponent={() => <EmptyComponent isLoading={chapterQuery.isLoading} />}
-                ItemSeparatorComponent={() => <Box height={1} backgroundColor={"border"}></Box>}
-                style={{ marginTop: 12 }}
-            />
-            <QueryStatus query={chapterQuery} name="chapters" />
+                    ListEmptyComponent={() => <EmptyComponent isLoading={chapterQuery.isLoading} />}
+                    ItemSeparatorComponent={() => <Box height={1} backgroundColor={"border"}></Box>}
+                    style={{ marginTop: 12 }}
+                />
+            )}
         </>
     );
 }
@@ -216,6 +222,13 @@ const styles = StyleSheet.create({
         width: "100%",
         overflow: "hidden",
         position: "absolute",
+    },
+    gradientContainer: {
+        height: 312,
+        width: "100%",
+        position: "absolute",
+        backgroundColor: "#000000",
+        opacity: 0.3,
     },
     image: {
         height: "180%",

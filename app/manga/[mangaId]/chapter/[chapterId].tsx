@@ -8,6 +8,7 @@ import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Box from "@/components/common/Box";
 import Text from "@/components/common/Text";
+import Skeleton from "@/components/common/Skeleton";
 
 export default function ChapterPage() {
     const [headerShown, setHeaderShown] = useState(false);
@@ -43,7 +44,6 @@ export default function ChapterPage() {
                 </Box>
             )}
             <Pressable onPress={toggleHeader} style={{ flex: 1 }}>
-                <QueryStatus query={pageResponseQuery} name="pageResponse" />
                 {hash && pages && (
                     <FlatList
                         data={pages}
@@ -79,7 +79,7 @@ export default function ChapterPage() {
 function PageImage({ pageUrl: dataSaver, hash }: { pageUrl: string; hash: string }) {
     const pageQuery = useFetchPage(dataSaver, hash);
     const windowWidth = Dimensions.get("window").width;
-    const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+    const [imageSize, setImageSize] = useState({ width: windowWidth, height: 400 });
 
     // Used to get the page image size
     useEffect(() => {
@@ -95,8 +95,7 @@ function PageImage({ pageUrl: dataSaver, hash }: { pageUrl: string; hash: string
 
     return (
         <>
-            <QueryStatus query={pageQuery} name="image" />
-            {pageQuery.data && (
+            {pageQuery.data ? (
                 <Image
                     source={{ uri: pageQuery.data }}
                     style={{
@@ -105,6 +104,8 @@ function PageImage({ pageUrl: dataSaver, hash }: { pageUrl: string; hash: string
                         resizeMode: "contain",
                     }}
                 />
+            ) : (
+                <Skeleton width={imageSize.width} height={imageSize.height} />
             )}
         </>
     );

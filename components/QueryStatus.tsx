@@ -1,19 +1,23 @@
 import { UseQueryResult } from "@tanstack/react-query";
-import { ActivityIndicator, Dimensions } from "react-native";
-import Box from "./common/Box";
+import { Dimensions, DimensionValue } from "react-native";
 import Text from "./common/Text";
 import Skeleton from "./common/Skeleton";
 
-export function QueryStatus({ query, name }: { query: UseQueryResult<unknown>; name: string }) {
+export function QueryStatus({
+    query,
+    name,
+    width,
+    height,
+}: {
+    query: UseQueryResult<unknown>;
+    name: string;
+    width: DimensionValue;
+    height: DimensionValue;
+}) {
     const windowWidth = Dimensions.get("window").width;
 
     if (query.isLoading) {
-        return (
-            // <Box alignItems={"center"} justifyContent={"center"} height={180}>
-            //     <ActivityIndicator size="large" />
-            // </Box>
-            <Skeleton width={120} height={180} />
-        );
+        return <Skeleton width={width} height={height} />;
     }
 
     if (query.isError || !query) {
