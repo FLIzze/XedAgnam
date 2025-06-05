@@ -1,4 +1,8 @@
-import { useFetchPage as useFetchPage, useFetchPageResponse } from "@/queries/fetch";
+import {
+    useFetchPage as useFetchPage,
+    useFetchPageResponse,
+    useFetchWholeFeed,
+} from "@/queries/fetch";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { Dimensions, FlatList, Image } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
@@ -12,9 +16,19 @@ import Text from "@/components/common/Text";
 export default function ChapterPage() {
     const [headerShown, setHeaderShown] = useState(false);
 
-    const { chapterId } = useLocalSearchParams<{ chapterId: string }>();
-    const { chapterNumber } = useLocalSearchParams<{ chapterNumber: string }>();
+    const { chapterId, mangaId } = useLocalSearchParams<{ chapterId: string; mangaId: string }>();
+
     const pageResponseQuery = useFetchPageResponse(chapterId);
+    const feedQuery = useFetchWholeFeed(mangaId);
+
+    const chapterIndex = feedQuery.data?.findIndex(el => el.id === chapterId);
+
+    if (!chapterIndex) {
+        return;
+    }
+
+    const previousChapter = feedQuery.data?.[chapterIndex - 1];
+    const nextChapter = feedQuery.data?.[chapterIndex + 1];
 
     const chapter = pageResponseQuery.data?.chapter;
     const pages = chapter?.dataSaver ?? [];
@@ -39,7 +53,7 @@ export default function ChapterPage() {
                     <Pressable onPress={router.back}>
                         <Ionicons name="chevron-back" size={28} color="white" />
                     </Pressable>
-                    <Text fontSize={18}>Ch. {chapterNumber}</Text>
+                    <Text fontSize={18}>Ch. {chapterIndex}</Text>
                 </Box>
             )}
             <Pressable onPress={toggleHeader} style={{ flex: 1 }}>
@@ -49,7 +63,7 @@ export default function ChapterPage() {
                         data={pages}
                         renderItem={({ item }) => <PageImage pageUrl={item} hash={hash} />}
                         initialNumToRender={3}
-                        windowSize={99}
+                        windowSize={pages.length}
                         maxToRenderPerBatch={3}
                     />
                 )}
@@ -64,12 +78,23 @@ export default function ChapterPage() {
                     zIndex={99}
                     marginTop={"sm"}
                     gap={"lg"}>
-                    <Pressable onPress={() => {}}>
-                        <Ionicons name="chevron-back" size={28} color="white" />
-                    </Pressable>
-                    <Pressable onPress={() => {}}>
-                        <Ionicons name="chevron-forward" size={28} color="white" />
-                    </Pressable>
+                    {chapterIndex !== 1 && previousChapter && (
+                        <Pressable
+                            onPress={() => {
+                                router.push(`/manga/${mangaId}/chapter/${previousChapter.id}`);
+                            }}>
+                            <Ionicons name="chevron-back" size={28} color="white" />
+                        </Pressable>
+                    )}
+
+                    {chapterIndex !== feedQuery.data?.length && nextChapter && (
+                        <Pressable
+                            onPress={() => {
+                                router.push(`/manga/${mangaId}/chapter/${nextChapter.id}`);
+                            }}>
+                            <Ionicons name="chevron-forward" size={28} color="white" />
+                        </Pressable>
+                    )}
                 </Box>
             )}
         </GestureHandlerRootView>
@@ -81,7 +106,6 @@ function PageImage({ pageUrl: dataSaver, hash }: { pageUrl: string; hash: string
     const windowWidth = Dimensions.get("window").width;
     const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
-    // Used to get the page image size
     useEffect(() => {
         if (pageQuery.data) {
             Image.getSize(pageQuery.data, (w, h) =>
