@@ -1,6 +1,6 @@
 import { Author, FeedData, Manga, PageResponse } from "@/interface";
 import { Filter } from "@/types";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, UseQueryResult } from "@tanstack/react-query";
 
 const apiUrl = "https://api.mangadex.org";
 const uploadApiUrl = "https://uploads.mangadex.org";
@@ -171,7 +171,7 @@ export function useFetchMangaFeed(mangaId: string, limit: number) {
     });
 }
 
-export function useFetchPage(pageUrl: string, hash: string) {
+export function useFetchPage(pageUrl: string, hash: string): UseQueryResult<any, Error> {
     return useQuery({
         queryKey: ["chapterPage", pageUrl],
         queryFn: () => fetchPageByChapter(pageUrl, hash),

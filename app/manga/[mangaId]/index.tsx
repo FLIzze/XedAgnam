@@ -10,8 +10,15 @@ import {
 } from "@/queries/fetch";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
-import { Image, ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { Image, ActivityIndicator, FlatList, StyleSheet } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
+import Animated, {
+    FadeIn,
+    FadeInDown,
+    FadeInLeft,
+    FadeInRight,
+    FadeInUp,
+} from "react-native-reanimated";
 
 export default function MangaPage() {
     const { mangaId } = useLocalSearchParams<{ mangaId: string }>();
@@ -59,7 +66,7 @@ function DisplayCover({ manga }: { manga: Manga }) {
 
     return (
         <>
-            <View style={styles.container}>
+            <Animated.View style={styles.container} entering={FadeIn.duration(700)}>
                 {coverQuery.isLoading && <Skeleton width={"100%"} height={"100%"} />}
                 {coverQuery.data && (
                     <Image
@@ -68,8 +75,8 @@ function DisplayCover({ manga }: { manga: Manga }) {
                         style={styles.image}
                     />
                 )}
-            </View>
-            <View style={styles.gradientContainer} />
+            </Animated.View>
+            <Animated.View style={styles.gradientContainer} />
         </>
     );
 }
@@ -81,9 +88,11 @@ function DisplayAuthor({ authorId }: { authorId: string }) {
         <>
             {author.isLoading && <Skeleton width={"40%"} height={20} />}
             {author.data && (
-                <Text fontSize={14} style={styles.textWithShadow}>
+                <Animated.Text
+                    style={{ fontSize: 14, color: "white" }}
+                    entering={FadeInLeft.duration(700)}>
                     {author.data.attributes.name}
-                </Text>
+                </Animated.Text>
             )}
         </>
     );
@@ -99,19 +108,25 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
     return (
         <Box paddingHorizontal={"lg"} gap={"sm"} height={240}>
             <Box flexDirection={"row"} gap={"sm"}>
-                {mangaAttributes.tags.slice(0, 3).map(attribute => (
-                    <Text fontSize={12} key={attribute.id} style={styles.textWithShadow}>
-                        {attribute.attributes.name.en}
-                    </Text>
-                ))}
+                <Animated.View
+                    entering={FadeInUp.duration(700)}
+                    style={{ flexDirection: "row", gap: 8 }}>
+                    {mangaAttributes.tags.slice(0, 3).map(attribute => (
+                        <Text fontSize={12} key={attribute.id} style={styles.textWithShadow}>
+                            {attribute.attributes.name.en}
+                        </Text>
+                    ))}
+                </Animated.View>
             </Box>
-            <Text
-                color={"textPrimary"}
-                fontSize={18}
-                style={styles.textWithShadow}
+            <Animated.Text
+                style={{
+                    color: "white",
+                    fontSize: 18,
+                }}
+                entering={FadeInRight.duration(700)}
                 numberOfLines={2}>
                 {title}
-            </Text>
+            </Animated.Text>
             {author && artist && (
                 <>
                     {author.id !== artist.id ? (
@@ -127,9 +142,11 @@ function DisplayMetadata({ metadata }: { metadata: Manga }) {
                     )}
                 </>
             )}
-            <Text color={"textPrimary"} fontSize={13} style={styles.textWithShadow}>
+            <Animated.Text
+                style={{ fontSize: 13, color: "white" }}
+                entering={FadeInDown.duration(700)}>
                 {mangaAttributes.publicationDemographic}
-            </Text>
+            </Animated.Text>
         </Box>
     );
 }
@@ -140,8 +157,7 @@ function DisplayChapters({ mangaId, metadata }: { mangaId: string; metadata: Man
     const chapters = chapterQuery.data?.pages.flat() ?? [];
 
     return (
-        <>
-            {/* {!chapterQuery.data && chapterQuery.isLoading && <Skeleton width={120} height={200} />} */}
+        <Animated.View entering={FadeIn.duration(700)}>
             {chapterQuery.data && (
                 <FlatList
                     data={chapters}
@@ -165,7 +181,7 @@ function DisplayChapters({ mangaId, metadata }: { mangaId: string; metadata: Man
                     style={{ marginTop: 12 }}
                 />
             )}
-        </>
+        </Animated.View>
     );
 }
 
@@ -198,8 +214,8 @@ function DisplayChaptersLink({
                 backgroundColor={"background"}
                 flexDirection={"row"}
                 paddingHorizontal={"md"}>
-                <Text fontSize={13}>Ch. {item.attributes.chapter}</Text>
-                <Text fontSize={13}>#{index + 1}</Text>
+                <Text style={{ fontSize: 13, color: "white" }}>Ch. {item.attributes.chapter}</Text>
+                <Text style={{ fontSize: 13, color: "white" }}>#{index + 1}</Text>
             </Box>
         </Pressable>
     );
@@ -209,7 +225,14 @@ function EmptyComponent({ isLoading }: { isLoading: boolean }) {
     if (!isLoading) {
         return (
             <Box backgroundColor={"background"}>
-                <Text color={"textPrimary"}>No chapters available.</Text>
+                <Text
+                    style={{
+                        fontSize: 13,
+                        color: "white",
+                        alignItems: "center",
+                    }}>
+                    No chapters available.
+                </Text>
             </Box>
         );
     }

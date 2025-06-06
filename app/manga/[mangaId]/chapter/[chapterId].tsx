@@ -1,8 +1,4 @@
-import {
-    useFetchPage as useFetchPage,
-    useFetchPageResponse,
-    useFetchWholeFeed,
-} from "@/queries/fetch";
+import { useFetchPage, useFetchPageResponse, useFetchWholeFeed } from "@/queries/fetch";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { Dimensions, FlatList, Image } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
