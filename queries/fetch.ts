@@ -4,7 +4,7 @@ import { useInfiniteQuery, useQuery, UseQueryResult } from "@tanstack/react-quer
 
 const apiUrl = "https://api.mangadex.org";
 const uploadApiUrl = "https://uploads.mangadex.org";
-const contentRating = ["safe", "suggestive"];
+const contentRating = ["safe"];
 const lang = "en";
 
 async function fetchByType(type: Filter): Promise<Manga[]> {
