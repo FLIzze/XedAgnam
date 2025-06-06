@@ -58,7 +58,7 @@ export default function ChapterPage() {
         <GestureHandlerRootView style={{ backgroundColor: "#FFFFFF", flex: 1 }}>
             {headersShown && (
                 <Animated.View style={styles.topHeader} entering={FadeInUp.duration(300)}>
-                    <Pressable onPress={() => router.push(`/manga/${mangaId}`)}>
+                    <Pressable hitSlop={32} onPress={() => router.push(`/manga/${mangaId}`)}>
                         <Ionicons name="chevron-back" size={28} color="white" />
                     </Pressable>
                     <Text fontSize={18}>Ch. {chapterIndex + 1}</Text>
@@ -79,6 +79,7 @@ export default function ChapterPage() {
                 <Animated.View entering={FadeInDown.duration(300)} style={styles.bottomHeader}>
                     {previousChapterId && (
                         <Pressable
+                            hitSlop={32}
                             onPress={() =>
                                 router.push(`/manga/${mangaId}/chapter/${previousChapterId}`)
                             }>
@@ -87,6 +88,7 @@ export default function ChapterPage() {
                     )}
                     {nextChapterId && (
                         <Pressable
+                            hitSlop={32}
                             onPress={() =>
                                 router.push(`/manga/${mangaId}/chapter/${nextChapterId}`)
                             }>
