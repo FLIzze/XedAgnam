@@ -35,10 +35,11 @@ export default function MangaPage() {
                         justifyContent={"space-between"}
                         paddingHorizontal={"sm"}
                         zIndex={99}>
-                        <Pressable onPress={() => router.push(`/`)}>
+                        <Pressable hitSlop={32} onPress={() => router.push(`/`)}>
                             <Ionicons name="chevron-back" size={28} color="white" />
                         </Pressable>
                         <Pressable
+                            hitSlop={32}
                             onPress={() =>
                                 router.push({
                                     pathname: `/manga/[mangaId]/about`,

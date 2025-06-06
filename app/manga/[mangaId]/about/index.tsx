@@ -16,7 +16,7 @@ export default function MangaAboutPage() {
                 paddingHorizontal={"sm"}
                 zIndex={99}
                 backgroundColor={"cardBackground"}>
-                <Pressable onPress={router.back}>
+                <Pressable hitSlop={32} onPress={router.back}>
                     <Ionicons name="close" size={36} color="white" />
                 </Pressable>
             </Box>
