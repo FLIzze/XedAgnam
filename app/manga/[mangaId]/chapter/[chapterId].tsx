@@ -7,7 +7,7 @@ import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Text from "@/components/common/Text";
 import Skeleton from "@/components/common/Skeleton";
-import Animated, { FadeInDown, FadeInUp, FadeOutUp } from "react-native-reanimated";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import theme from "@/theme";
 
 const width = Dimensions.get("screen").width;
@@ -26,7 +26,6 @@ export default function ChapterPage() {
         return;
     }
 
-    // for some reason findIndex was not working if index is 0?
     for (let i = 0; i < feedQuery.data.length; i++) {
         if (feedQuery.data[i].id === chapterId) {
             chapterIndex = i;

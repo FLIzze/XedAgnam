@@ -5,7 +5,7 @@ import theme from "@/theme";
 import { Image, useWindowDimensions, ScrollView } from "react-native";
 
 export default function OnBoardingScreen() {
-    const { width, height } = useWindowDimensions();
+    const { width } = useWindowDimensions();
     const slides = [
         {
             title: "Explore un univers infini de mangas.",
