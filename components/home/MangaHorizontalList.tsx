@@ -36,7 +36,7 @@ export default function MangaHorizontalList({
                     windowSize={1}
                     initialNumToRender={3}
                     data={Array.from(Array(10).keys())}
-                    renderItem={() => <Skeleton width={120} height={210} />}
+                    renderItem={() => <Skeleton width={120} height={240} />}
                 />
             ) : (
                 <FlatList

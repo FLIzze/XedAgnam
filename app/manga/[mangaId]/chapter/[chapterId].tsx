@@ -4,17 +4,18 @@ import {
     useFetchWholeFeed,
 } from "@/queries/fetch";
 import { useLocalSearchParams } from "expo-router/build/hooks";
-import { Dimensions, FlatList, Image } from "react-native";
+import { Dimensions, FlatList, Image, StyleSheet } from "react-native";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import Box from "@/components/common/Box";
 import Text from "@/components/common/Text";
 import Skeleton from "@/components/common/Skeleton";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import theme from "@/theme";
 
 export default function ChapterPage() {
-    const [headerShown, setHeaderShown] = useState(false);
+    const [headersShown, setHeadersShown] = useState(false);
 
     const { chapterId, mangaId } = useLocalSearchParams<{ chapterId: string; mangaId: string }>();
 
@@ -50,26 +51,18 @@ export default function ChapterPage() {
     const hash = chapter?.hash;
 
     const toggleHeader = () => {
-        setHeaderShown(!headerShown);
+        setHeadersShown(!headersShown);
     };
 
     return (
-        <GestureHandlerRootView>
-            {headerShown && (
-                <Box
-                    height={64}
-                    flexDirection={"row"}
-                    alignItems={"flex-end"}
-                    justifyContent={"flex-start"}
-                    gap={"lg"}
-                    paddingHorizontal={"sm"}
-                    zIndex={99}
-                    marginBottom={"sm"}>
+        <GestureHandlerRootView style={{ backgroundColor: "#FFFFFF", flex: 1 }}>
+            {headersShown && (
+                <Animated.View style={styles.topHeader} entering={FadeInUp.duration(300)}>
                     <Pressable onPress={() => router.push(`/manga/${mangaId}`)}>
                         <Ionicons name="chevron-back" size={28} color="white" />
                     </Pressable>
                     <Text fontSize={18}>Ch. {chapterIndex + 1}</Text>
-                </Box>
+                </Animated.View>
             )}
             <Pressable onPress={toggleHeader} style={{ flex: 1 }}>
                 {hash && pages && (
@@ -77,21 +70,13 @@ export default function ChapterPage() {
                         data={pages}
                         renderItem={({ item }) => <PageImage pageUrl={item} hash={hash} />}
                         initialNumToRender={3}
-                        windowSize={pages.length}
+                        windowSize={60}
                         maxToRenderPerBatch={3}
                     />
                 )}
             </Pressable>
-            {headerShown && (
-                <Box
-                    height={58}
-                    flexDirection={"row"}
-                    alignItems={"flex-start"}
-                    justifyContent={"flex-end"}
-                    paddingHorizontal={"sm"}
-                    zIndex={99}
-                    marginTop={"sm"}
-                    gap={"lg"}>
+            {headersShown && (
+                <Animated.View entering={FadeInDown.duration(300)} style={styles.bottomHeader}>
                     {previousChapterId && (
                         <Pressable
                             onPress={() =>
@@ -108,7 +93,7 @@ export default function ChapterPage() {
                             <Ionicons name="chevron-forward" size={28} color="white" />
                         </Pressable>
                     )}
-                </Box>
+                </Animated.View>
             )}
         </GestureHandlerRootView>
     );
@@ -147,3 +132,26 @@ function PageImage({ pageUrl: dataSaver, hash }: { pageUrl: string; hash: string
         </>
     );
 }
+
+const styles = StyleSheet.create({
+    topHeader: {
+        height: 80,
+        flexDirection: "row",
+        alignItems: "flex-end",
+        justifyContent: "flex-start",
+        gap: theme.spacing.lg,
+        paddingHorizontal: theme.spacing.sm,
+        paddingBottom: theme.spacing.sm,
+        backgroundColor: theme.colors.background,
+    },
+    bottomHeader: {
+        height: 74,
+        flexDirection: "row",
+        alignItems: "flex-start",
+        justifyContent: "flex-end",
+        paddingHorizontal: theme.spacing.sm,
+        paddingTop: theme.spacing.sm,
+        gap: theme.spacing.lg,
+        backgroundColor: theme.colors.background,
+    },
+});
