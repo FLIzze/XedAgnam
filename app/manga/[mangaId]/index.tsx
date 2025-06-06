@@ -35,7 +35,7 @@ export default function MangaPage() {
                         justifyContent={"space-between"}
                         paddingHorizontal={"sm"}
                         zIndex={99}>
-                        <Pressable hitSlop={32} onPress={() => router.push(`/`)}>
+                        <Pressable hitSlop={32} onPress={() => router.replace(`/`)}>
                             <Ionicons name="chevron-back" size={28} color="white" />
                         </Pressable>
                         <Pressable
@@ -199,7 +199,7 @@ function DisplayChaptersLink({
         <Pressable
             key={item.id}
             onPress={() =>
-                router.push({
+                router.replace({
                     pathname: "/manga/[mangaId]/chapter/[chapterId]",
                     params: {
                         mangaId,

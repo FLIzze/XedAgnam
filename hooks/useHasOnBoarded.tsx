@@ -13,7 +13,7 @@ export function useHasOnBoarded() {
                 setHasOnBoarded(onboarded);
                 setCheckedStorage(true);
                 if (!onboarded) {
-                    router.replace("/onboarding");
+                    router.push("/onboarding");
                 }
             });
         }

@@ -13,7 +13,7 @@ const asyncStoragePersister = createAsyncStoragePersister({
 });
 
 function LogoTitle() {
-    return <Image source={logo} style={{ width: 50, height: 50 }} />;
+    return <Image source={logo} style={{ width: 70, height: 70 }} />;
 }
 
 export default function RootLayout() {
@@ -41,6 +41,7 @@ export default function RootLayout() {
                             headerBackVisible: false,
                         }}
                     />
+
                     <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
                     <Stack.Screen
                         name="manga/[mangaId]/index"

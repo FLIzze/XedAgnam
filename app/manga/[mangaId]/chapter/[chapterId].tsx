@@ -7,8 +7,10 @@ import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Text from "@/components/common/Text";
 import Skeleton from "@/components/common/Skeleton";
-import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import Animated, { FadeInDown, FadeInUp, FadeOutUp } from "react-native-reanimated";
 import theme from "@/theme";
+
+const width = Dimensions.get("screen").width;
 
 export default function ChapterPage() {
     const [headersShown, setHeadersShown] = useState(false);
@@ -54,7 +56,7 @@ export default function ChapterPage() {
         <GestureHandlerRootView style={{ backgroundColor: "#FFFFFF", flex: 1 }}>
             {headersShown && (
                 <Animated.View style={styles.topHeader} entering={FadeInUp.duration(300)}>
-                    <Pressable hitSlop={32} onPress={() => router.push(`/manga/${mangaId}`)}>
+                    <Pressable hitSlop={32} onPress={() => router.replace(`/manga/${mangaId}`)}>
                         <Ionicons name="chevron-back" size={28} color="white" />
                     </Pressable>
                     <Text fontSize={18}>Ch. {chapterIndex + 1}</Text>
@@ -77,7 +79,7 @@ export default function ChapterPage() {
                         <Pressable
                             hitSlop={32}
                             onPress={() =>
-                                router.push(`/manga/${mangaId}/chapter/${previousChapterId}`)
+                                router.replace(`/manga/${mangaId}/chapter/${previousChapterId}`)
                             }>
                             <Ionicons name="chevron-back" size={28} color="white" />
                         </Pressable>
@@ -86,7 +88,7 @@ export default function ChapterPage() {
                         <Pressable
                             hitSlop={32}
                             onPress={() =>
-                                router.push(`/manga/${mangaId}/chapter/${nextChapterId}`)
+                                router.replace(`/manga/${mangaId}/chapter/${nextChapterId}`)
                             }>
                             <Ionicons name="chevron-forward" size={28} color="white" />
                         </Pressable>
@@ -134,6 +136,7 @@ function PageImage({ pageUrl: dataSaver, hash }: { pageUrl: string; hash: string
 const styles = StyleSheet.create({
     topHeader: {
         height: 80,
+        width: width,
         flexDirection: "row",
         alignItems: "flex-end",
         justifyContent: "flex-start",
@@ -141,9 +144,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: theme.spacing.sm,
         paddingBottom: theme.spacing.sm,
         backgroundColor: theme.colors.background,
+        position: "absolute",
+        top: 0,
+        zIndex: 99,
     },
     bottomHeader: {
-        height: 74,
+        height: 80,
+        width: width,
         flexDirection: "row",
         alignItems: "flex-start",
         justifyContent: "flex-end",
@@ -151,5 +158,8 @@ const styles = StyleSheet.create({
         paddingTop: theme.spacing.sm,
         gap: theme.spacing.lg,
         backgroundColor: theme.colors.background,
+        position: "absolute",
+        bottom: 0,
+        zIndex: 99,
     },
 });
