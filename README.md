@@ -1,4 +1,6 @@
-### release v/0.2.0
+## XedAgnam
+
+### release v/0.3.0
 
 ```
 yarn
